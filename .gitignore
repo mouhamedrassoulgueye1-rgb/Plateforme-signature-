@@ -1,0 +1,11 @@
+# Identifiants de connexion a la base
+config/db.php
+
+# Photos envoyees par les utilisateurs
+uploads/photos/*
+!uploads/photos/.gitkeep
+
+# Fichiers systeme / editeur
+.vscode/
+Thumbs.db
+.DS_Store
