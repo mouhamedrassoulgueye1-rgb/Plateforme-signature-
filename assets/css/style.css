@@ -73,3 +73,21 @@ h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--espace); }
 /* =============================================================================================
    Styles propres aux pages : une section par équipe, sous cette ligne.
    ============================================================================================= */
+
+/* ---- Équipe 6 : administration ---- */
+.admin-connexion { max-width: 480px; margin: 40px auto; }
+.admin-menu { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: var(--espace); }
+.admin-titre { display: flex; justify-content: space-between; align-items: center; gap: var(--espace); flex-wrap: wrap; }
+.admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--espace); margin-bottom: var(--espace); }
+.admin-stat { margin: 0; color: var(--couleur-texte-doux); font-size: 14px; }
+.admin-stat-valeur { display: block; font-size: 32px; font-weight: 800; color: var(--couleur-texte); }
+.admin-stat-alerte .admin-stat-valeur { color: var(--couleur-erreur); }
+.admin-colonnes { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--espace); }
+.admin-filtres { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end; }
+.admin-tableau-defilant { overflow-x: auto; }
+.admin-actions { white-space: nowrap; }
+.admin-actions a + a { margin-left: 10px; }
+.admin-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+.admin-badge-actif { background: #ecfdf5; color: var(--couleur-succes); }
+.admin-badge-suspendu { background: #fef2f2; color: var(--couleur-erreur); }
+@media (max-width: 700px) { .admin-filtres { grid-template-columns: 1fr; } }
