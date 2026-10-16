@@ -42,6 +42,7 @@ require __DIR__ . '/../includes/header.php';
     <a class="btn" href="<?= e(url('admin/utilisateurs.php')) ?>">Utilisateurs</a>
     <a class="btn btn-secondaire" href="<?= e(url('admin/utilisateur_creer.php')) ?>">Créer un utilisateur</a>
     <a class="btn btn-secondaire" href="<?= e(url('admin/signatures.php')) ?>">Gérer les signatures</a>
+    <a class="btn btn-secondaire" href="<?= e(url('admin/mot_de_passe.php')) ?>">Mon mot de passe</a>
 </nav>
 
 <div class="admin-stats">

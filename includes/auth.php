@@ -62,10 +62,23 @@ function utilisateur(): ?array
  */
 function exiger_role(string $role): array
 {
+    global $pdo;
     $u = utilisateur();
     if ($u === null || $u['role'] !== $role) {
         flash('erreur', 'Connectez-vous pour accéder à cette page.');
         rediriger(ROLES[$role]['connexion']);
+    }
+    // Le compte a pu être suspendu ou supprimé par l'admin depuis la connexion : on vérifie à chaque page
+    $r = ROLES[$role];
+    $colonne = $role === 'admin' ? '1' : 'statut_compte';
+    $req = $pdo->prepare('SELECT ' . $colonne . ' FROM ' . $r['table'] . ' WHERE ' . $r['id'] . ' = ?');
+    $req->execute([$u['id']]);
+    $statut = $req->fetchColumn();
+    if ($statut === false || ($role !== 'admin' && $statut !== 'actif')) {
+        fermer_session();
+        session_start();
+        flash('erreur', 'Votre compte n’est plus actif. Contactez l’administrateur.');
+        rediriger($r['connexion']);
     }
     return $u;
 }

@@ -90,7 +90,7 @@ Ces fonctions sont communes : on les appelle, on ne les réécrit pas. Pour en c
 | Fonction | Fichier | Utilisée par |
 |---|---|---|
 | `verifier_identifiants()`, `ouvrir_session()`, `exiger_role()`, `fermer_session()`, `utilisateur()` | `includes/auth.php` | Équipes 2, 3, 6 et toutes les pages protégées |
-| `enregistrer_signature()` + `MESSAGES_SIGNATURE` | `includes/signatures.php` | Équipe 3 (box), Équipe 4 (QR code), Équipe 6 (ajout manuel) |
+| `enregistrer_signature()` (renvoie `ok`, `deja_signe`, `introuvable` ou `suspendu`) + `MESSAGES_SIGNATURE` | `includes/signatures.php` | Équipe 3 (box), Équipe 4 (QR code), Équipe 6 (ajout manuel) |
 | `nb_signatures_filleul()`, `rang_filleul()`, `nb_filleuls_actifs()`, `signataires_du_filleul()` | `includes/signatures.php` | Équipes 3 et 5 |
 | `nb_signatures_parrain()`, `filleuls_signes_par()` | `includes/signatures.php` | Équipe 4 |
 | `e()`, `url()`, `rediriger()`, `flash()`, CSRF, validations, `enregistrer_photo()` | `includes/fonctions.php` | Tout le monde |

@@ -11,6 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     conf.addEventListener('input', verifier);
   });
 
+  // Formulaires sensibles : <form data-confirmer="Message de confirmation"> demande une confirmation avant l'envoi
+  document.querySelectorAll('form[data-confirmer]').forEach((form) => {
+    form.addEventListener('submit', (ev) => {
+      if (!window.confirm(form.dataset.confirmer)) ev.preventDefault();
+    });
+  });
+
   // Les messages de succès disparaissent après 5 secondes
   document.querySelectorAll('.alerte-succes').forEach((el) => setTimeout(() => el.remove(), 5000));
 });

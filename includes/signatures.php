@@ -6,10 +6,23 @@
 
 /**
  * Enregistre la signature d'un parrain pour un DUT1.
- * Renvoie 'ok', 'deja_signe' (le parrain a déjà signé pour ce DUT1) ou 'introuvable' (id inconnu).
+ * Renvoie 'ok', 'deja_signe' (le parrain a déjà signé pour ce DUT1), 'introuvable' (id inconnu)
+ * ou 'suspendu' (l'un des deux comptes a été suspendu par l'admin).
  */
 function enregistrer_signature(PDO $pdo, int $id_parrain, int $id_filleul): string
 {
+    $req = $pdo->prepare(
+        'SELECT (SELECT statut_compte FROM parrain WHERE id_parrain = ?) AS p,
+                (SELECT statut_compte FROM filleul WHERE id_filleul = ?) AS f'
+    );
+    $req->execute([$id_parrain, $id_filleul]);
+    $statuts = $req->fetch();
+    if ($statuts['p'] === null || $statuts['f'] === null) {
+        return 'introuvable';
+    }
+    if ($statuts['p'] !== 'actif' || $statuts['f'] !== 'actif') {
+        return 'suspendu';
+    }
     try {
         $req = $pdo->prepare('INSERT INTO signature (id_parrain, id_filleul) VALUES (?, ?)');
         $req->execute([$id_parrain, $id_filleul]);
@@ -31,6 +44,7 @@ const MESSAGES_SIGNATURE = [
     'ok'          => 'Signature enregistrée. Merci !',
     'deja_signe'  => 'Vous avez déjà signé pour cette personne.',
     'introuvable' => 'Ce DUT1 est introuvable.',
+    'suspendu'    => 'Signature impossible : ce compte est suspendu.',
 ];
 
 function nb_signatures_filleul(PDO $pdo, int $id_filleul): int

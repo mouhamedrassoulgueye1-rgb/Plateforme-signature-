@@ -43,6 +43,7 @@ Stack : HTML, CSS, JavaScript, PHP, MySQL.
 | `assets/js/scanner.js` | Lecture du QR code avec la caméra | **Équipe 4** |
 | `dut1/signatures.php` | Liste des signatures DUT1 : WhatsApp, rang, nombre | **Équipe 5** |
 | `admin/connexion.php` | Connexion administrateur | **Équipe 6** |
+| `admin/fonctions_admin.php` | Fonctions partagées par les pages admin (lecture du compte visé, validation, champs) | **Équipe 6** |
 | `admin/index.php` | Tableau de bord | **Équipe 6** |
 | `admin/utilisateurs.php` | Liste de tous les utilisateurs | **Équipe 6** |
 | `admin/utilisateur_creer.php` | Création d'un utilisateur | **Équipe 6** |
