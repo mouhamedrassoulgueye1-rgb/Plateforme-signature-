@@ -1,7 +1,17 @@
+-- =============================================================================================
+-- Base de données Site Signature 2027 (MySQL 8 / MariaDB de XAMPP)
+-- À exécuter dans phpMyAdmin (onglet SQL) ou : mysql -u root < sql/signature2027.sql
+-- Toute modification de ce fichier passe par une pull request validée par le groupe (fichier Commun).
+-- Les requêtes de lecture sont dans includes/signatures.php, pas ici.
+--
+-- Conventions : tables au singulier en minuscules, colonnes en snake_case,
+-- clé primaire id_<table>, téléphone stocké en chiffres avec l'indicatif (221771234567).
+-- =============================================================================================
+
 CREATE DATABASE IF NOT EXISTS signature2027 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE signature2027;
 
-CREATE TABLE parrain (
+CREATE TABLE IF NOT EXISTS parrain (
   id_parrain       INT AUTO_INCREMENT PRIMARY KEY,
   nom              VARCHAR(50)  NOT NULL,
   prenom           VARCHAR(80)  NOT NULL,
@@ -15,7 +25,7 @@ CREATE TABLE parrain (
   statut_compte    ENUM('actif','suspendu') DEFAULT 'actif'
 ) ENGINE=InnoDB;
 
-CREATE TABLE filleul (
+CREATE TABLE IF NOT EXISTS filleul (
   id_filleul       INT AUTO_INCREMENT PRIMARY KEY,
   nom              VARCHAR(50)  NOT NULL,
   prenom           VARCHAR(80)  NOT NULL,
@@ -28,7 +38,7 @@ CREATE TABLE filleul (
 ) ENGINE=InnoDB;
 
 -- La clé primaire composée empêche un parrain de signer deux fois pour le même DUT1 (RG6)
-CREATE TABLE signature (
+CREATE TABLE IF NOT EXISTS signature (
   id_parrain     INT NOT NULL,
   id_filleul     INT NOT NULL,
   date_signature DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -39,7 +49,7 @@ CREATE TABLE signature (
     REFERENCES filleul(id_filleul) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE administrateur (
+CREATE TABLE IF NOT EXISTS administrateur (
   id_admin        INT AUTO_INCREMENT PRIMARY KEY,
   nom             VARCHAR(50)  NOT NULL,
   prenom          VARCHAR(80)  NOT NULL,
@@ -47,22 +57,7 @@ CREATE TABLE administrateur (
   mot_de_passe    VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB;
 
--- Compteur de signatures d'un DUT1 (page d'accueil DUT1)
-SELECT COUNT(*) AS nb_signatures FROM signature WHERE id_filleul = ?;
-
--- Liste des signataires d'un DUT1 avec téléphone pour le lien WhatsApp
-SELECT p.prenom, p.nom, p.type_parrain, p.telephone, s.date_signature
-FROM signature s JOIN parrain p ON p.id_parrain = s.id_parrain
-WHERE s.id_filleul = ? ORDER BY s.date_signature;
-
--- Classement des DUT1 par nombre de signatures (rang)
-SELECT f.id_filleul, f.prenom, f.nom,
-       COUNT(s.id_parrain) AS nb_signatures,
-       RANK() OVER (ORDER BY COUNT(s.id_parrain) DESC) AS rang
-FROM filleul f LEFT JOIN signature s ON s.id_filleul = f.id_filleul
-GROUP BY f.id_filleul, f.prenom, f.nom;
-
--- Nombre de signatures données par un parrain + liste des DUT1 concernés
-SELECT f.prenom, f.nom, f.telephone, s.date_signature
-FROM signature s JOIN filleul f ON f.id_filleul = s.id_filleul
-WHERE s.id_parrain = ?;
+-- Premier administrateur : générez le hash du mot de passe, puis remplacez <HASH> :
+--   php -r "echo password_hash('votre_mot_de_passe', PASSWORD_DEFAULT);"
+-- INSERT INTO administrateur (nom, prenom, nom_utilisateur, mot_de_passe)
+-- VALUES ('Nom', 'Prénom', 'admin', '<HASH>');
