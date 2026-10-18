@@ -77,3 +77,5 @@ Un signataire ne peut signer qu'une fois pour un même DUT1 : la base refuse le 
 
 Tout est dans [CONTRIBUTING.md](CONTRIBUTING.md) : vocabulaire, modèle de page, conventions de nommage,
 fonctions communes, Git et sécurité. À lire avant de coder.
+
+État du travail et tâches restantes : [evolution.md](evolution.md). Revue du code et erreurs à éviter : [commentaire.md](commentaire.md).
