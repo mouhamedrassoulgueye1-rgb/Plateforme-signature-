@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $titre_page = 'Créer un utilisateur';
-require __DIR__ . '/../includes/header.php';
+admin_debut($titre_page, 'utilisateurs');
 ?>
 <p><a href="<?= e(url('admin/utilisateurs.php')) ?>">← Utilisateurs</a></p>
 <section class="carte">
@@ -74,4 +74,4 @@ require __DIR__ . '/../includes/header.php';
         <button class="btn">Créer le compte</button>
     </form>
 </section>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php admin_fin(); ?>

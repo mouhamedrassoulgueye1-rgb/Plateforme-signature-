@@ -127,3 +127,59 @@ function admin_choix_type(string $valeur, array $erreurs): string
     }
     return $html . '</div>';
 }
+
+// ---------------------------------------------------------------------------------------------
+// Mise en page de l'administration : barre latérale bleu nuit + contenu (maquette « Équipe 6 »)
+// ---------------------------------------------------------------------------------------------
+
+/** Icônes SVG (traits, 24 × 24), sans bibliothèque externe. */
+function admin_icone(string $nom, int $taille = 20): string
+{
+    $traces = [
+        'tableau'         => '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+        'utilisateurs'    => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2A6.5 6.5 0 0 1 21.5 20"/>',
+        'signatures'      => '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+        'classement'      => '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/>',
+        'telechargements' => '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/>',
+        'parametres'      => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+        'deconnexion'     => '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>',
+        'personne'        => '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+        'groupe'          => '<circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2 20a6 6 0 0 1 12 0M10 20a6 6 0 0 1 12 0"/>',
+        'valide'          => '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/>',
+        'actifs'          => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="m16 11 2 2 4-4"/>',
+        'ajouter'         => '<path d="M12 5v14M5 12h14"/>',
+    ];
+    return '<svg class="admin-icone" width="' . $taille . '" height="' . $taille . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        . ($traces[$nom] ?? '') . '</svg>';
+}
+
+/** Entrées du menu latéral : clé => [libellé, page, icône]. */
+const MENU_ADMIN = [
+    'tableau'         => ['Tableau de bord', 'admin/index.php', 'tableau'],
+    'utilisateurs'    => ['Utilisateurs', 'admin/utilisateurs.php', 'utilisateurs'],
+    'signatures'      => ['Signatures', 'admin/signatures.php', 'signatures'],
+    'classement'      => ['Classement', 'admin/classement.php', 'classement'],
+    'telechargements' => ['Téléchargements', 'admin/telechargements.php', 'telechargements'],
+    'parametres'      => ['Paramètres', 'admin/mot_de_passe.php', 'parametres'],
+];
+
+/** Début d'une page admin : en-tête commun, puis barre latérale. $actif : clé de MENU_ADMIN. */
+function admin_debut(string $titre_page, string $actif): void
+{
+    require __DIR__ . '/../includes/header.php';
+    echo '<div class="admin-cadre"><aside class="admin-barre"><nav>';
+    foreach (MENU_ADMIN as $cle => [$libelle, $page, $icone]) {
+        echo '<a class="admin-lien' . ($cle === $actif ? ' actif' : '') . '" href="' . e(url($page)) . '">'
+            . admin_icone($icone) . '<span>' . e($libelle) . '</span></a>';
+    }
+    echo '<a class="admin-lien admin-lien-sortie" href="' . e(url('admin/deconnexion.php')) . '">'
+        . admin_icone('deconnexion') . '<span>Déconnexion</span></a>';
+    echo '</nav></aside><div class="admin-contenu">';
+}
+
+/** Fin d'une page admin. */
+function admin_fin(): void
+{
+    echo '</div></div>';
+    require __DIR__ . '/../includes/footer.php';
+}

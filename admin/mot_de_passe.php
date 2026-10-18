@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $titre_page = $pour_moi ? 'Changer mon mot de passe' : 'Nouveau mot de passe pour ' . $c['prenom'] . ' ' . $c['nom'];
-require __DIR__ . '/../includes/header.php';
+admin_debut($titre_page, 'parametres');
 ?>
 <p><a href="<?= e($pour_moi ? url('admin/index.php') : admin_url('utilisateur_voir.php', $c['role'], $c['id'])) ?>">← Retour</a></p>
 <section class="carte">
@@ -64,4 +64,4 @@ require __DIR__ . '/../includes/header.php';
         <button class="btn">Enregistrer</button>
     </form>
 </section>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php admin_fin(); ?>

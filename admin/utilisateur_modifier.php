@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $titre_page = 'Modifier ' . $c['prenom'] . ' ' . $c['nom'];
-require __DIR__ . '/../includes/header.php';
+admin_debut($titre_page, 'utilisateurs');
 ?>
 <p><a href="<?= e(admin_url('utilisateur_voir.php', $c['role'], $c['id'])) ?>">← Fiche</a></p>
 <section class="carte">
@@ -97,4 +97,4 @@ require __DIR__ . '/../includes/header.php';
     </form>
     <p class="petit">Pour changer le mot de passe : <a href="<?= e(admin_url('mot_de_passe.php', $c['role'], $c['id'])) ?>">nouveau mot de passe</a>.</p>
 </section>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php admin_fin(); ?>

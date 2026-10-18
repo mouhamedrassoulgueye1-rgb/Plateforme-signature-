@@ -27,9 +27,11 @@ h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--espace); }
 
 /* Mise en page */
 .conteneur { max-width: 960px; margin: 0 auto; padding: calc(var(--espace) * 1.5) var(--espace); }
-.entete { display: flex; justify-content: space-between; align-items: center; padding: 12px var(--espace); background: var(--couleur-principale-fonce); color: #fff; }
-.entete a { color: #fff; text-decoration: none; }
-.entete-logo { font-weight: 700; }
+.entete { display: flex; justify-content: space-between; align-items: center; padding: 12px calc(var(--espace) * 1.5); background: #fff; border-top: 5px solid var(--couleur-principale); border-bottom: 1px solid var(--couleur-bordure); color: var(--couleur-principale-fonce); }
+.entete a { color: var(--couleur-principale-fonce); text-decoration: none; }
+.entete-logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; }
+.entete-logo svg { color: var(--couleur-principale); }
+.entete-utilisateur { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
 .entete-nav { display: flex; gap: var(--espace); align-items: center; }
 .pied { text-align: center; color: var(--couleur-texte-doux); font-size: 14px; padding: calc(var(--espace) * 2) var(--espace); }
 .carte { background: var(--couleur-carte); border: 1px solid var(--couleur-bordure); border-radius: var(--rayon); padding: calc(var(--espace) * 1.5); margin-bottom: var(--espace); }
@@ -66,6 +68,8 @@ h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--espace); }
 .avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
 
 @media (max-width: 600px) {
+    .entete { padding: 10px var(--espace); }
+    .entete-logo { font-size: 14px; }
     .tableau { font-size: 14px; }
     .compteur { font-size: 44px; }
 }
@@ -75,23 +79,48 @@ h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--espace); }
    ============================================================================================= */
 
 /* ---- Équipe 6 : administration ---- */
+.conteneur:has(.admin-cadre) { max-width: 1280px; }
 .admin-connexion { max-width: 480px; margin: 40px auto; }
+.admin-cadre { display: grid; grid-template-columns: 230px 1fr; gap: calc(var(--espace) * 1.5); align-items: start; }
+.admin-barre { position: sticky; top: var(--espace); background: #0b2a6f; border-radius: var(--rayon); padding: 12px; box-shadow: 0 10px 30px rgba(11, 42, 111, 0.25); }
+.admin-barre nav { display: grid; gap: 4px; }
+.admin-lien { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 9px; color: #c7d2fe; text-decoration: none; font-weight: 500; font-size: 15px; }
+.admin-lien:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.admin-lien.actif { background: var(--couleur-principale); color: #fff; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.5); }
+.admin-lien-sortie { margin-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.12); border-radius: 0 0 9px 9px; padding-top: 16px; }
+.admin-icone { flex-shrink: 0; vertical-align: middle; }
+.admin-contenu { min-width: 0; }
+.admin-contenu h1 { color: var(--couleur-principale-fonce); }
+.admin-titre { display: flex; justify-content: space-between; align-items: center; gap: var(--espace); flex-wrap: wrap; margin-bottom: var(--espace); }
+.admin-titre h1 { margin: 0; }
+.admin-titre .btn { display: inline-flex; align-items: center; gap: 8px; }
+.admin-titre-section { display: flex; justify-content: space-between; align-items: baseline; }
+.admin-titre-section a { font-size: 14px; font-weight: 600; }
 .admin-menu { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: var(--espace); }
-.admin-titre { display: flex; justify-content: space-between; align-items: center; gap: var(--espace); flex-wrap: wrap; }
-.admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--espace); margin-bottom: var(--espace); }
-.admin-stat { margin: 0; color: var(--couleur-texte-doux); font-size: 14px; }
-.admin-stat-valeur { display: block; font-size: 32px; font-weight: 800; color: var(--couleur-texte); }
-.admin-stat-alerte .admin-stat-valeur { color: var(--couleur-erreur); }
-.admin-colonnes { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--espace); }
+.admin-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--espace); margin-bottom: 12px; }
+.admin-stat { display: grid; gap: 6px; background: var(--couleur-carte); border: 1px solid var(--couleur-bordure); border-radius: var(--rayon); padding: 18px; }
+.admin-stat-icone { width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; }
+.admin-teinte-bleu { background: #dbeafe; color: #1d4ed8; }
+.admin-teinte-orange { background: #ffedd5; color: #ea580c; }
+.admin-teinte-vert { background: #dcfce7; color: #16a34a; }
+.admin-teinte-violet { background: #ede9fe; color: #7c3aed; }
+.admin-stat-libelle { color: var(--couleur-texte-doux); font-size: 14px; }
+.admin-stat-valeur { font-size: 30px; font-weight: 800; color: var(--couleur-texte); line-height: 1.1; }
+.admin-resume { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0 0 var(--espace); font-size: 14px; color: var(--couleur-texte-doux); }
+.admin-resume a { color: inherit; text-decoration: none; }
+.admin-resume-alerte { color: var(--couleur-erreur) !important; }
+.admin-colonnes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: var(--espace); }
+.admin-colonnes > .carte { min-width: 0; overflow-x: auto; }
+.admin-role { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; background: #fff7ed; color: #c2410c; }
+.admin-role-dut1 { background: #eff6ff; color: #1d4ed8; }
 .admin-filtres { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end; }
+.admin-filtres-2 { grid-template-columns: 1fr auto; }
 .admin-tableau-defilant { overflow-x: auto; }
 .admin-actions { white-space: nowrap; }
 .admin-actions a + a { margin-left: 10px; }
 .admin-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; }
 .admin-badge-actif { background: #ecfdf5; color: var(--couleur-succes); }
 .admin-badge-suspendu { background: #fef2f2; color: var(--couleur-erreur); }
-@media (max-width: 700px) { .admin-filtres { grid-template-columns: 1fr; } }
-.admin-filtres-2 { grid-template-columns: 1fr auto; }
 .admin-onglets { display: flex; gap: 8px; margin-bottom: var(--espace); flex-wrap: wrap; }
 .admin-onglets a { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--couleur-bordure); text-decoration: none; }
 .admin-onglets a.actif { background: var(--couleur-principale); color: #fff; border-color: var(--couleur-principale); }
@@ -104,6 +133,26 @@ h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--espace); }
 .admin-infos dd { margin: 0; font-weight: 600; }
 .admin-danger { border-color: #fecaca; }
 .admin-btn-petit { padding: 6px 12px; font-size: 14px; }
+.admin-rang { display: inline-flex; width: 30px; height: 30px; border-radius: 50%; align-items: center; justify-content: center; font-weight: 700; background: var(--couleur-fond); }
+.admin-rang-1 { background: #fde68a; color: #92400e; }
+.admin-rang-2 { background: #e5e7eb; color: #374151; }
+.admin-rang-3 { background: #fed7aa; color: #9a3412; }
+.admin-pagination { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: var(--espace) 0; }
+.admin-pagination a { min-width: 36px; padding: 6px 10px; text-align: center; border-radius: 8px; border: 1px solid var(--couleur-bordure); background: #fff; text-decoration: none; }
+.admin-pagination a.actif { background: var(--couleur-principale); color: #fff; border-color: var(--couleur-principale); }
+.admin-exports { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--espace); }
+.admin-export { display: flex; gap: 14px; align-items: flex-start; text-decoration: none; color: var(--couleur-texte); margin: 0; }
+.admin-export:hover { border-color: var(--couleur-principale); }
+.admin-export strong { display: block; margin-bottom: 4px; }
+@media (max-width: 900px) {
+    .admin-cadre { grid-template-columns: minmax(0, 1fr); }
+    .admin-barre { position: static; padding: 8px; min-width: 0; }
+    .admin-barre nav { display: flex; overflow-x: auto; gap: 4px; }
+    .admin-lien { white-space: nowrap; padding: 9px 12px; }
+    .admin-lien-sortie { margin: 0; border: 0; padding-top: 9px; }
+    .admin-stats { grid-template-columns: repeat(2, 1fr); }
+    .admin-filtres { grid-template-columns: 1fr; }
+}
 
 /* ---- Équipe 5 : classement (dut1/classement.php) et mes signatures (dut1/signatures.php) ----
    Maquette du front adaptée aux règles communes : l'en-tête et le pied de page sont ceux de header.php / footer.php,

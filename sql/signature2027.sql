@@ -9,6 +9,7 @@
 -- =============================================================================================
 
 CREATE DATABASE IF NOT EXISTS signature2027 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET NAMES utf8mb4;
 USE signature2027;
 
 CREATE TABLE IF NOT EXISTS parrain (

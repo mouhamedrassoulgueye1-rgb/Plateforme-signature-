@@ -44,9 +44,8 @@ if ($dut1) {
 }
 
 $titre_page = 'Gérer les signatures';
-require __DIR__ . '/../includes/header.php';
+admin_debut($titre_page, 'signatures');
 ?>
-<p><a href="<?= e(url('admin/index.php')) ?>">← Tableau de bord</a></p>
 <h1><?= e($titre_page) ?></h1>
 
 <form class="carte admin-filtres admin-filtres-2" method="get">
@@ -119,4 +118,4 @@ require __DIR__ . '/../includes/header.php';
         <?php endif; ?>
     </section>
 <?php endif; ?>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php admin_fin(); ?>

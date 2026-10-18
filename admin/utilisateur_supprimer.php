@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $titre_page = 'Supprimer ' . $c['prenom'] . ' ' . $c['nom'];
-require __DIR__ . '/../includes/header.php';
+admin_debut($titre_page, 'utilisateurs');
 ?>
 <p><a href="<?= e(admin_url('utilisateur_voir.php', $c['role'], $c['id'])) ?>">← Fiche</a></p>
 <section class="carte admin-danger">
@@ -42,4 +42,4 @@ require __DIR__ . '/../includes/header.php';
         <button class="btn btn-danger">Supprimer définitivement</button>
     </form>
 </section>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php admin_fin(); ?>
