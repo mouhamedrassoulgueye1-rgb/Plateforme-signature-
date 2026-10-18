@@ -51,7 +51,7 @@ function nb_signatures_parrain(PDO $pdo, int $id_parrain): int
 function signataires_du_filleul(PDO $pdo, int $id_filleul): array
 {
     $req = $pdo->prepare(
-        'SELECT p.id_parrain, p.prenom, p.nom, p.type_parrain, p.chambre, p.telephone, s.date_signature
+        'SELECT p.id_parrain, p.prenom, p.nom, p.type_parrain, p.chambre, p.telephone, p.photo, s.date_signature
          FROM signature s JOIN parrain p ON p.id_parrain = s.id_parrain
          WHERE s.id_filleul = ? ORDER BY s.date_signature'
     );
