@@ -17,7 +17,11 @@ Stack : HTML, CSS, JavaScript, PHP, MySQL.
 | Fichier | Rôle | Équipe |
 |---|---|---|
 | `index.php` | Page d'entrée (liens inscription / connexion) | Commun |
-| `config/db.example.php` | Modèle de connexion PDO | Commun |
+| `config/db.example.php` | Modèle de configuration (base, `BASE_URL`) | Commun |
+| `includes/init.php` | Démarrage de chaque page : session, `$pdo`, fonctions | Commun |
+| `includes/fonctions.php` | Échappement, redirection, messages, CSRF, validations, photos | Commun |
+| `includes/auth.php` | Identifiants, session, protection des pages selon le rôle | Commun |
+| `includes/signatures.php` | Enregistrement d'une signature (refus des doublons), compteurs, rang, listes | Commun |
 | `includes/header.php`, `includes/footer.php` | En-tête et pied de page | Commun |
 | `assets/css/style.css`, `assets/js/main.js` | Style et script communs | Commun |
 | `sql/signature2027.sql` | Création de la base | Commun |
@@ -26,12 +30,10 @@ Stack : HTML, CSS, JavaScript, PHP, MySQL.
 | `connexion/dut1.php` | Connexion DUT1 | **Équipe 2** |
 | `connexion/parrain.php` | Connexion parrains, marraines, Mames | **Équipe 2** |
 | `connexion/deconnexion.php` | Déconnexion | **Équipe 2** |
-| `includes/auth.php` | Session et protection des pages selon le rôle | **Équipe 2** |
 | `dut1/accueil.php` | Accueil DUT1 : compteur, bouton « Signer », QR code, checklist | **Équipe 3** |
 | `dut1/signer.php` | Box de signature (sur le téléphone du DUT1) + messages | **Équipe 3** |
 | `dut1/registre.php` | Registre des parrains avec leur chambre | **Équipe 3** |
 | `dut1/telecharger.php` | Téléchargement de la liste des signataires | **Équipe 3** |
-| `includes/signatures.php` | Fonction d'enregistrement d'une signature (refus des doublons) | **Équipe 3** (utilisée par l'Équipe 4) |
 | `assets/js/qrcode.js` | Génération du QR code du DUT1 | **Équipe 3** |
 | `parrain/accueil.php` | Accueil des signataires : nombre de signatures | **Équipe 4** |
 | `parrain/signatures.php` | Personnes pour qui le signataire a signé | **Équipe 4** |
@@ -41,6 +43,7 @@ Stack : HTML, CSS, JavaScript, PHP, MySQL.
 | `assets/js/scanner.js` | Lecture du QR code avec la caméra | **Équipe 4** |
 | `dut1/signatures.php` | Liste des signatures DUT1 : WhatsApp, rang, nombre | **Équipe 5** |
 | `admin/connexion.php` | Connexion administrateur | **Équipe 6** |
+| `admin/fonctions_admin.php` | Fonctions partagées par les pages admin (lecture du compte visé, validation, champs) | **Équipe 6** |
 | `admin/index.php` | Tableau de bord | **Équipe 6** |
 | `admin/utilisateurs.php` | Liste de tous les utilisateurs | **Équipe 6** |
 | `admin/utilisateur_creer.php` | Création d'un utilisateur | **Équipe 6** |
@@ -61,9 +64,5 @@ Un signataire ne peut signer qu'une fois pour un même DUT1 : la base refuse le 
 
 ## Règles de travail en équipe
 
-- Une branche par fonctionnalité : `equipe1/inscription-dut1`, `equipe3/qrcode`, etc. Jamais de travail direct sur `main`.
-- Chaque équipe ne modifie que ses fichiers. Pour un fichier **Commun**, prévenir les autres équipes et passer par une pull request.
-- Faire `git pull origin main` avant de commencer à travailler.
-- Pas de `git push --force` sur `main`.
-- Ne jamais commiter `config/db.php` ni le contenu de `uploads/photos/`.
-- Toujours utiliser des requêtes préparées (PDO), `password_hash()` / `password_verify()` et `htmlspecialchars()` à l'affichage.
+Tout est dans [CONTRIBUTING.md](CONTRIBUTING.md) : vocabulaire, modèle de page, conventions de nommage,
+fonctions communes, Git et sécurité. À lire avant de coder.

@@ -1,0 +1,106 @@
+/* =============================================================================================
+   Style commun. Les équipes UTILISENT ces classes et variables ; elles n'en redéfinissent pas.
+   Un style propre à une page va à la fin, dans une section « Équipe N : page », préfixé par la page
+   (ex. .accueil-dut1-compteur), pour ne jamais écraser le travail des autres.
+   ============================================================================================= */
+
+:root {
+    --couleur-principale: #1d4ed8;
+    --couleur-principale-fonce: #1e3a8a;
+    --couleur-accent: #f59e0b;
+    --couleur-succes: #047857;
+    --couleur-erreur: #b91c1c;
+    --couleur-texte: #0f172a;
+    --couleur-texte-doux: #64748b;
+    --couleur-fond: #f1f5f9;
+    --couleur-carte: #ffffff;
+    --couleur-bordure: #e2e8f0;
+    --rayon: 12px;
+    --espace: 16px;
+    --police: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; font-family: var(--police); color: var(--couleur-texte); background: var(--couleur-fond); line-height: 1.5; }
+a { color: var(--couleur-principale); }
+h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--espace); }
+
+/* Mise en page */
+.conteneur { max-width: 960px; margin: 0 auto; padding: calc(var(--espace) * 1.5) var(--espace); }
+.entete { display: flex; justify-content: space-between; align-items: center; padding: 12px var(--espace); background: var(--couleur-principale-fonce); color: #fff; }
+.entete a { color: #fff; text-decoration: none; }
+.entete-logo { font-weight: 700; }
+.entete-nav { display: flex; gap: var(--espace); align-items: center; }
+.pied { text-align: center; color: var(--couleur-texte-doux); font-size: 14px; padding: calc(var(--espace) * 2) var(--espace); }
+.carte { background: var(--couleur-carte); border: 1px solid var(--couleur-bordure); border-radius: var(--rayon); padding: calc(var(--espace) * 1.5); margin-bottom: var(--espace); }
+.centre { text-align: center; }
+.petit { font-size: 14px; color: var(--couleur-texte-doux); }
+
+/* Formulaires */
+.formulaire { display: grid; gap: var(--espace); max-width: 480px; margin: 0 auto; }
+.champ { display: grid; gap: 6px; }
+.champ label { font-weight: 600; }
+.champ input, .champ select { width: 100%; padding: 10px 12px; font: inherit; border: 1px solid var(--couleur-bordure); border-radius: 8px; background: #fff; }
+.champ input:focus, .champ select:focus { outline: 2px solid var(--couleur-principale); border-color: transparent; }
+.champ-aide { font-size: 13px; color: var(--couleur-texte-doux); }
+
+/* Boutons */
+.btn { display: inline-block; padding: 11px 20px; border: 0; border-radius: 8px; background: var(--couleur-principale); color: #fff; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+.btn:hover { background: var(--couleur-principale-fonce); }
+.btn-secondaire { background: #fff; color: var(--couleur-principale); border: 1px solid var(--couleur-principale); }
+.btn-secondaire:hover { background: #eff6ff; }
+.btn-danger { background: var(--couleur-erreur); }
+.groupe-boutons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: var(--espace) 0; }
+
+/* Messages (générés par flash()) */
+.alerte { padding: 12px var(--espace); border-radius: 8px; margin-bottom: var(--espace); font-weight: 500; }
+.alerte-succes { background: #ecfdf5; color: var(--couleur-succes); border: 1px solid #a7f3d0; }
+.alerte-erreur { background: #fef2f2; color: var(--couleur-erreur); border: 1px solid #fecaca; }
+.alerte-info { background: #eff6ff; color: var(--couleur-principale-fonce); border: 1px solid #bfdbfe; }
+
+/* Données */
+.compteur { font-size: 56px; font-weight: 800; color: var(--couleur-principale); }
+.tableau { width: 100%; border-collapse: collapse; background: var(--couleur-carte); }
+.tableau th, .tableau td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--couleur-bordure); }
+.tableau th { font-size: 13px; text-transform: uppercase; color: var(--couleur-texte-doux); }
+.avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+
+@media (max-width: 600px) {
+    .tableau { font-size: 14px; }
+    .compteur { font-size: 44px; }
+}
+
+/* =============================================================================================
+   Styles propres aux pages : une section par équipe, sous cette ligne.
+   ============================================================================================= */
+
+/* ---- Équipe 6 : administration ---- */
+.admin-connexion { max-width: 480px; margin: 40px auto; }
+.admin-menu { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: var(--espace); }
+.admin-titre { display: flex; justify-content: space-between; align-items: center; gap: var(--espace); flex-wrap: wrap; }
+.admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--espace); margin-bottom: var(--espace); }
+.admin-stat { margin: 0; color: var(--couleur-texte-doux); font-size: 14px; }
+.admin-stat-valeur { display: block; font-size: 32px; font-weight: 800; color: var(--couleur-texte); }
+.admin-stat-alerte .admin-stat-valeur { color: var(--couleur-erreur); }
+.admin-colonnes { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--espace); }
+.admin-filtres { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end; }
+.admin-tableau-defilant { overflow-x: auto; }
+.admin-actions { white-space: nowrap; }
+.admin-actions a + a { margin-left: 10px; }
+.admin-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+.admin-badge-actif { background: #ecfdf5; color: var(--couleur-succes); }
+.admin-badge-suspendu { background: #fef2f2; color: var(--couleur-erreur); }
+@media (max-width: 700px) { .admin-filtres { grid-template-columns: 1fr; } }
+.admin-filtres-2 { grid-template-columns: 1fr auto; }
+.admin-onglets { display: flex; gap: 8px; margin-bottom: var(--espace); flex-wrap: wrap; }
+.admin-onglets a { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--couleur-bordure); text-decoration: none; }
+.admin-onglets a.actif { background: var(--couleur-principale); color: #fff; border-color: var(--couleur-principale); }
+.admin-erreur-champ { color: var(--couleur-erreur); font-size: 14px; }
+.admin-fiche { display: flex; gap: calc(var(--espace) * 1.5); align-items: flex-start; flex-wrap: wrap; }
+.admin-fiche-photo { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.admin-fiche-initiales { display: flex; align-items: center; justify-content: center; background: #dbeafe; color: var(--couleur-principale-fonce); font-size: 36px; font-weight: 700; }
+.admin-infos { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; }
+.admin-infos dt { color: var(--couleur-texte-doux); }
+.admin-infos dd { margin: 0; font-weight: 600; }
+.admin-danger { border-color: #fecaca; }
+.admin-btn-petit { padding: 6px 12px; font-size: 14px; }
