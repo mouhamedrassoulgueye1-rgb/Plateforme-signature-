@@ -9,6 +9,7 @@ require_once __DIR__ . '/signatures_fonctions.php';
 $donnees = lire_classement($pdo, $moi['id']);
 
 $titre_page = 'Classement';
+$bandeau = ['titre' => $titre_page, 'texte' => 'Découvre le classement des DUT1 selon le nombre de signatures reçues.'];
 require __DIR__ . '/../includes/header.php';
 ?>
 <div class="classement-page" id="classement"
@@ -19,17 +20,6 @@ require __DIR__ . '/../includes/header.php';
         <a class="classement-lien" href="<?= e(url('dut1/classement.php')) ?>" aria-current="page">Classement</a>
         <a class="classement-lien" href="<?= e(url('dut1/signatures.php')) ?>">Mes signatures</a>
     </nav>
-
-    <section class="classement-hero">
-        <div class="classement-hero-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/></svg>
-        </div>
-        <div class="classement-hero-text">
-            <h1><?= e($titre_page) ?></h1>
-            <p>Découvre le classement des DUT1 selon le nombre de signatures reçues.</p>
-        </div>
-        <div class="classement-hero-laptop" aria-hidden="true"></div>
-    </section>
 
     <div class="classement-grid">
 
@@ -55,7 +45,7 @@ require __DIR__ . '/../includes/header.php';
         <!-- Tableau -->
         <section class="classement-board">
             <div class="classement-board-head">
-                <span>Rang</span><span>DUT1</span><span>Promotion</span><span>Signatures</span><span>Progression</span>
+                <span>Rang</span><span>DUT1</span><span>Signatures</span><span>Progression</span>
             </div>
             <div id="classement-lignes" class="classement-rows"></div>
             <div class="classement-board-foot">
