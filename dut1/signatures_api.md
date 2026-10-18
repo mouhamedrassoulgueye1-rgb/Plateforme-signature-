@@ -40,7 +40,8 @@ Chaque signataire :
 | Champ | Type | Contenu |
 |---|---|---|
 | `nom`, `prenom` | texte | |
-| `type_parrain` | texte | `Parrain`, `Marraine`, `Mame1`, `Mame2`, `Mame3` ou `Alumni` |
+| `type_parrain` | texte | `Parrain`, `Marraine`, `Mame1`, `Mame2`, `Mame3` ou `Alumni` (valeur de la base) |
+| `type_libelle` | texte | Libellé à afficher, réglé par l’admin (ex. `Mame 1`) |
 | `chambre` | texte | Telle que saisie à l'inscription, ex. `29G` |
 | `photo` | texte ou `null` | Adresse de la photo, utilisable telle quelle dans `src`. `null` : afficher les initiales |
 | `whatsapp` | texte ou `null` | Lien `https://wa.me/221…`. `null` : bouton WhatsApp désactivé |
@@ -85,17 +86,7 @@ Toujours du JSON de la forme `{"erreur": "…"}`.
 
 ## Tester en local
 
-La connexion DUT1 (Équipe 2) n'existe pas encore. Pour tester en attendant, créez à la racine un fichier `test_connexion.php`. **Ne le commitez jamais et supprimez-le après le test.**
-
-```php
-<?php
-require_once __DIR__ . '/includes/init.php';
-$req = $pdo->prepare('SELECT * FROM filleul WHERE id_filleul = ?');
-$req->execute([(int) ($_GET['id'] ?? 0)]);
-$dut1 = $req->fetch() ?: exit('DUT1 introuvable');
-$dut1['id'] = (int) $dut1['id_filleul'];
-ouvrir_session('dut1', $dut1);
-rediriger('dut1/signatures.php');
-```
-
-Ouvrez ensuite `http://localhost/signature2027/test_connexion.php?id=1`, puis `dut1/classement.php` avec le lien en haut de la page. Les DUT1, les parrains et les signatures peuvent être créés depuis l'administration (Équipe 6), une fois sa branche fusionnée.
+1. Charge la base de test partagée : `sql/donnees_test.sql` dans phpMyAdmin (base locale uniquement, elle vide les tables).
+2. Connecte-toi en DUT1 sur `connexion/dut1.php`, par exemple `awa.ndiaye` / `motdepasse`.
+3. Ouvre `dut1/signatures.php` puis `dut1/classement.php`. Les signatures s'ajoutent ou se retirent depuis l'administration
+   (`admin/signatures.php`, compte `admin` / `admin2027`) : la page se met à jour dans les 30 secondes.

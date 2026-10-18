@@ -49,3 +49,36 @@ function traiter_connexion(PDO $pdo, string $role): string
     rediriger(ROLES[$role]['accueil']);
     return '';
 }
+
+/** Carte du formulaire de connexion (identique pour les deux rôles, sous le bandeau de la page). */
+function afficher_formulaire_connexion(string $role, string $erreur): void
+{
+    $invalide = $erreur !== '' ? 'true' : 'false';
+    ?>
+    <section class="carte carte-etroite">
+        <h2>Connecte-toi</h2>
+        <p class="petit">Entre ton nom d’utilisateur et ton mot de passe.</p>
+        <form class="formulaire" id="form-connexion" method="post" novalidate>
+            <?= champ_csrf() ?>
+            <div class="champ">
+                <label for="nom_utilisateur">Nom d’utilisateur</label>
+                <input id="nom_utilisateur" name="nom_utilisateur" autocomplete="username" autocapitalize="none" spellcheck="false"
+                       required maxlength="30" value="<?= e($_POST['nom_utilisateur'] ?? '') ?>" aria-invalid="<?= $invalide ?>">
+            </div>
+            <div class="champ">
+                <label for="mot_de_passe">Mot de passe</label>
+                <div class="champ-mdp">
+                    <input id="mot_de_passe" name="mot_de_passe" type="password" autocomplete="current-password" required aria-invalid="<?= $invalide ?>">
+                    <button type="button" class="oeil" data-cible="mot_de_passe" aria-label="Afficher le mot de passe">Afficher</button>
+                </div>
+            </div>
+            <p class="champ-erreur" id="connexion-message" role="alert" aria-live="polite"><?= e($erreur) ?></p>
+            <button class="btn btn-large" id="connexion-bouton" type="submit">
+                <span class="attente" aria-hidden="true"></span>
+                <span id="connexion-bouton-texte">Se connecter</span>
+            </button>
+        </form>
+        <p class="petit centre">Pas encore de compte ? <a href="<?= e(url('inscription/' . $role . '.php')) ?>">Crée ton compte</a></p>
+    </section>
+    <?php
+}

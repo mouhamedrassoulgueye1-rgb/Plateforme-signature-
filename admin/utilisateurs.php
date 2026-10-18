@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/init.php';
+require_once __DIR__ . '/fonctions_admin.php';
 $moi = exiger_role('admin');
 
 // Filtres : ?role=tous|dut1|parrain  &statut=tous|actif|suspendu  &q=recherche
@@ -46,9 +47,8 @@ usort($comptes, fn($a, $b) => [$a['nom'], $a['prenom']] <=> [$b['nom'], $b['pren
 $libelles_role = ['dut1' => 'DUT1', 'parrain' => 'Parrain'];
 
 $titre_page = 'Utilisateurs';
-require __DIR__ . '/../includes/header.php';
+admin_debut($titre_page, 'utilisateurs');
 ?>
-<p><a href="<?= e(url('admin/index.php')) ?>">← Tableau de bord</a></p>
 <div class="admin-titre">
     <h1><?= e($titre_page) ?> <span class="petit">(<?= e(count($comptes)) ?>)</span></h1>
     <a class="btn" href="<?= e(url('admin/utilisateur_creer.php')) ?>">Créer un utilisateur</a>
@@ -92,7 +92,7 @@ require __DIR__ . '/../includes/header.php';
                     <td><?= e($c['prenom'] . ' ' . $c['nom']) ?></td>
                     <td><?= e($c['nom_utilisateur']) ?></td>
                     <td>
-                        <?= e($c['type_parrain'] ?? $libelles_role[$c['role']]) ?>
+                        <?= e($c['type_parrain'] !== null ? libelle_type($c['type_parrain']) : $libelles_role[$c['role']]) ?>
                         <?php if ($c['chambre']): ?><span class="petit">· ch. <?= e($c['chambre']) ?></span><?php endif; ?>
                     </td>
                     <td><a href="<?= e(lien_whatsapp($c['telephone'])) ?>" target="_blank" rel="noopener"><?= e($c['telephone']) ?></a></td>
@@ -108,4 +108,4 @@ require __DIR__ . '/../includes/header.php';
         </table>
     </div>
 <?php endif; ?>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php admin_fin(); ?>

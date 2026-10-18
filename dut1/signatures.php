@@ -12,6 +12,7 @@ $donnees = lire_donnees_signatures($pdo, $moi['id']);
 $lien_signature = url('parrain/valider.php?dut1=' . $moi['id']);
 
 $titre_page = 'Mes signatures';
+$bandeau = ['titre' => $titre_page, 'texte' => 'Retrouve toutes les signatures reçues de tes parrains, marraines et Mames.'];
 require __DIR__ . '/../includes/header.php';
 ?>
 <div class="classement-page signatures-dut1" id="signatures-dut1"
@@ -22,22 +23,11 @@ require __DIR__ . '/../includes/header.php';
     <nav class="classement-liens" aria-label="Classement et signatures">
         <a class="classement-lien" href="<?= e(url('dut1/classement.php')) ?>">Classement</a>
         <a class="classement-lien" href="<?= e(url('dut1/signatures.php')) ?>" aria-current="page">Mes signatures</a>
-    </nav>
-
-    <section class="classement-hero">
-        <div class="classement-hero-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>
-        </div>
-        <div class="classement-hero-text">
-            <h1><?= e($titre_page) ?></h1>
-            <p>Retrouve toutes les signatures reçues de tes parrains, marraines et Mames.</p>
-        </div>
-        <div class="classement-hero-laptop" aria-hidden="true"></div>
-        <button class="signatures-dut1-hero-action" id="signatures-dut1-partager" type="button">
+        <button class="signatures-dut1-partager" id="signatures-dut1-partager" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="17" cy="18" r="2.5"/><path d="M8.2 10.8l6.6-3.6M8.2 13.2l6.6 3.6"/></svg>
             Partager mon lien
         </button>
-    </section>
+    </nav>
 
     <!-- Cartes de résumé -->
     <div class="signatures-dut1-kpis">

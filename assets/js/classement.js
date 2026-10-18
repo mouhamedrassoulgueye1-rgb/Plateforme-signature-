@@ -4,7 +4,6 @@
 
 /* ===== Configuration ===== */
 const PER_PAGE = 10;             // lignes par page
-const PROMOTION = 2027;          // même valeur pour tous : la base n'a pas de colonne « promotion »
 const ACTUALISATION_MS = 30000;  // actualisation automatique
 
 const page = document.getElementById("classement");
@@ -16,7 +15,6 @@ function versListe(classement) {
   return classement.map((p) => ({
     rank: p.rang,
     name: `${p.nom} ${p.prenom}`,
-    promotion: PROMOTION,
     signatures: p.nb_signatures,
     photo: p.photo,
     me: p.moi,
@@ -52,7 +50,6 @@ function rowHTML(p) {
     <div class="${cls}">
       <span><span class="classement-rank${medal}">${p.rank}</span></span>
       <span class="classement-person">${avatarHTML(p)}<span class="classement-person-name">${esc(p.name)}</span></span>
-      <span class="classement-promo">${p.promotion}</span>
       <span class="classement-sig">${p.signatures}</span>
       <span class="classement-progress">
         <span class="classement-bar"><i style="width:${pct}%"></i></span>

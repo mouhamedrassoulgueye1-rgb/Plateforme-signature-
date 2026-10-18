@@ -58,15 +58,20 @@ function utilisateur(): ?array
 
 /**
  * Protège une page : à mettre juste après init.php, par ex. $moi = exiger_role('dut1');
- * Redirige vers la page de connexion du rôle si personne (ou quelqu'un d'autre) est connecté.
+ * Personne n'est connecté : redirige vers la page de connexion du rôle. Connecté avec un autre rôle : vers son accueil.
  */
 function exiger_role(string $role): array
 {
     global $pdo;
     $u = utilisateur();
-    if ($u === null || $u['role'] !== $role) {
-        flash('erreur', 'Connectez-vous pour accéder à cette page.');
+    if ($u === null) {
+        flash('erreur', 'Connecte-toi pour accéder à cette page.');
         rediriger(ROLES[$role]['connexion']);
+    }
+    if ($u['role'] !== $role) {
+        // Connecté, mais avec un autre rôle : retour sur sa propre page d'accueil
+        flash('info', 'Cette page n’est pas accessible avec ton compte.');
+        rediriger(ROLES[$u['role']]['accueil']);
     }
     // Le compte a pu être suspendu ou supprimé par l'admin depuis la connexion : on vérifie à chaque page
     $r = ROLES[$role];
@@ -76,7 +81,7 @@ function exiger_role(string $role): array
     $statut = $req->fetchColumn();
     if ($statut === false || ($role !== 'admin' && $statut !== 'actif')) {
         fermer_session();
-        flash('erreur', 'Votre compte n’est plus actif. Contactez l’administrateur.');
+        flash('erreur', 'Ton compte n’est plus actif. Contacte l’administration.');
         rediriger($r['connexion']);
     }
     return $u;

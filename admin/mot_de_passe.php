@@ -22,19 +22,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hash = password_hash((string) $_POST['mot_de_passe'], PASSWORD_DEFAULT);
         if ($pour_moi) {
             $pdo->prepare('UPDATE administrateur SET mot_de_passe = ? WHERE id_admin = ?')->execute([$hash, $moi['id']]);
-            flash('succes', 'Votre mot de passe a été changé.');
+            flash('succes', 'Ton mot de passe a été changé.');
             rediriger('admin/index.php');
         }
         $r = ROLES[$c['role']];
         $pdo->prepare('UPDATE ' . $r['table'] . ' SET mot_de_passe = ? WHERE ' . $r['id'] . ' = ?')->execute([$hash, $c['id']]);
-        flash('succes', 'Nouveau mot de passe enregistré. Transmettez-le à ' . $c['prenom'] . ' en privé (WhatsApp), et demandez-lui de ne le donner à personne.');
+        flash('succes', 'Nouveau mot de passe enregistré. Transmets-le à ' . $c['prenom'] . ' en privé (WhatsApp), et demande-lui de ne le donner à personne.');
         header('Location: ' . admin_url('utilisateur_voir.php', $c['role'], $c['id']));
         exit;
     }
 }
 
 $titre_page = $pour_moi ? 'Changer mon mot de passe' : 'Nouveau mot de passe pour ' . $c['prenom'] . ' ' . $c['nom'];
-require __DIR__ . '/../includes/header.php';
+admin_debut($titre_page, 'parametres');
 ?>
 <p><a href="<?= e($pour_moi ? url('admin/index.php') : admin_url('utilisateur_voir.php', $c['role'], $c['id'])) ?>">← Retour</a></p>
 <section class="carte">
@@ -64,4 +64,4 @@ require __DIR__ . '/../includes/header.php';
         <button class="btn">Enregistrer</button>
     </form>
 </section>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php admin_fin(); ?>

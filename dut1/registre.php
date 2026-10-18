@@ -136,10 +136,10 @@ $lignes = array_filter($registre, fn($r) => ($pavillon === '' || $r['info']['pav
 // 3. PAGE
 // =============================================================================
 $titre_page = 'Registre des parrains et Mames';
+$bandeau = ['titre' => $titre_page, 'texte' => 'Retrouve chaque signataire, sa chambre, et coche ceux qui ont déjà signé pour toi.'];
 require __DIR__ . '/../includes/header.php';
 ?>
 <section class="carte">
-    <h1><?= e($titre_page) ?></h1>
     <p class="petit"><?= e($nb_signes) ?> signature(s) sur <?= e(count($registre)) ?> signataires inscrits.</p>
 
     <form class="registre-filtres" method="get">
@@ -176,7 +176,7 @@ require __DIR__ . '/../includes/header.php';
                         <?php endif; ?>
                     </td>
                     <td><?= e($r['prenom'] . ' ' . $r['nom']) ?></td>
-                    <td><?= e($r['type_parrain']) ?></td>
+                    <td><?= e(libelle_type($r['type_parrain'])) ?></td>
                     <td><?= e($i['affiche']) ?></td>
                     <td><?= e($i['etage'] === ETAGE_AUCUN ? '' : $i['etage']) ?></td>
                     <td><?= $r['a_signe'] ? '✔ Oui' : 'Pas encore' ?></td>

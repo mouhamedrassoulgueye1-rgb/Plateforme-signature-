@@ -1,11 +1,8 @@
 /* =====================================================
-   SITE SIGNATURE 2027 - Styles des pages d'inscription
-   Utilisé par : inscription-dut1.html et inscription-parrain.html
-
-   IMPORTANT : ce fichier se charge APRÈS style.css (le CSS de l'équipe).
-   L'en-tête et le pied de page viennent de style.css.
-   Tout ce fichier est limité à la zone <main class="inscription">,
-   pour ne jamais modifier le style des autres pages.
+   Équipe 1 : formulaires d'inscription (inscription/dut1.php et inscription/parrain.php).
+   Chargé après style.css par $styles_page. L'en-tête, le bandeau et le pied de page
+   sont les éléments communs (includes/header.php, includes/footer.php) ;
+   ce fichier est limité à la zone <main class="… inscription">.
    ===================================================== */
 
 /* ---------- 1. Variables (couleurs de l'inscription) ---------- */
@@ -34,40 +31,6 @@
 .inscription *,
 .inscription *::before,
 .inscription *::after { box-sizing: border-box; }
-
-/* ---------- 2. Bandeau bleu (même ambiance que le hero de l'accueil) ---------- */
-.inscription .ins-bandeau {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, var(--marine) 0%, var(--marine-clair) 100%);
-  color: var(--blanc);
-  padding: 44px 20px 80px;
-}
-.inscription .ins-circuit {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 180px;
-  height: 130px;
-  color: rgba(255, 255, 255, 0.25);
-}
-.inscription .ins-bandeau-texte {
-  position: relative;
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-.inscription .ins-bandeau h1 {
-  margin: 0 0 6px;
-  font-size: clamp(1.6rem, 4.5vw, 2.3rem);
-  font-weight: 800;
-  line-height: 1.2;
-}
-.inscription .ins-bandeau .ins-slogan {
-  margin: 0;
-  color: #cfe0ff;
-  font-size: 0.98rem;
-}
 
 /* ---------- 3. Carte du formulaire (chevauche le bandeau) ---------- */
 .inscription .ins-contenu {
@@ -137,7 +100,6 @@
 .inscription .champ input:focus,
 .inscription .champ select:focus,
 .inscription .btn:focus-visible,
-.inscription .oeil:focus-visible,
 .inscription .btn-photo:focus-within {
   outline: none;
   border-color: var(--bleu-royal);
@@ -157,26 +119,6 @@
   color: var(--erreur);
 }
 
-/* Champ mot de passe avec bouton "œil" */
-.inscription .avec-oeil { position: relative; }
-.inscription .avec-oeil input { padding-right: 46px; }
-.inscription .oeil {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 34px;
-  height: 34px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--texte-doux);
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-}
-.inscription .oeil:hover { color: var(--bleu-royal); background: var(--ciel); }
-.inscription .oeil svg { width: 20px; height: 20px; }
 
 /* ---------- 5. Photo ---------- */
 .inscription .zone-photo {
@@ -265,7 +207,6 @@
 
 /* ---------- 7. Mobile ---------- */
 @media (max-width: 640px) {
-  .inscription .ins-bandeau { padding: 32px 16px 72px; }
   .inscription .ins-contenu { padding: 0 12px 40px; }
   .inscription .carte { padding: 22px 16px; }
   .inscription .grille { grid-template-columns: 1fr; }
@@ -274,111 +215,6 @@
 @media (prefers-reduced-motion: reduce) {
   .inscription * { transition: none !important; }
 }
-
-
-/* =====================================================
-   8. BASE, EN-TÊTE ET PIED DE PAGE
-   (autonomes : ne dépendent plus d'aucun autre fichier CSS)
-   Même ambiance que la page d'accueil : bleu marine, logo stylo, motifs circuit
-   ===================================================== */
-.page-inscription {
-  margin: 0;
-  font-family: "Poppins", "Segoe UI", Roboto, Arial, sans-serif;
-  background: #f3f6fb;
-}
-.ins-top *, .ins-top *::before, .ins-top *::after,
-.ins-foot *, .ins-foot *::before, .ins-foot *::after { box-sizing: border-box; }
-
-.ins-logo { width: 36px; height: 36px; flex: none; color: #fff; }
-
-/* ---------- En-tête ---------- */
-.ins-top {
-  position: relative;
-  z-index: 10;
-  background: #052a63;
-  color: #fff;
-  font-family: "Poppins", "Segoe UI", Roboto, Arial, sans-serif;
-}
-.ins-wrap {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.ins-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #fff;
-  text-decoration: none;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
-}
-.ins-brand b { font-weight: 700; }
-.ins-brand span { color: #6fb0ff; }
-
-.ins-nav { display: flex; align-items: center; gap: 8px; }
-.ins-home {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  color: #fff;
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-.ins-home svg { width: 18px; height: 18px; }
-.ins-home:hover { background: rgba(255, 255, 255, 0.12); }
-
-.ins-home:focus-visible,
-.ins-brand:focus-visible {
-  outline: 3px solid #6fb0ff;
-  outline-offset: 2px;
-}
-
-
-/* ---------- Pied de page ---------- */
-.ins-foot {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, #052a63 0%, #0a3a85 100%);
-  color: #fff;
-  text-align: center;
-  padding: 40px 20px 32px;
-  font-family: "Poppins", "Segoe UI", Roboto, Arial, sans-serif;
-}
-.ins-foot .ins-logo { width: 44px; height: 44px; margin: 0 auto 8px; display: block; }
-.ins-foot .ttl { font-size: 1.05rem; letter-spacing: 0.03em; }
-.ins-foot .ttl span { color: #6fb0ff; }
-.ins-foot .sl { margin: 6px 0 14px; color: #cfe0ff; font-size: 0.92rem; }
-.ins-foot .meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.82rem;
-  color: #b9cdf2;
-}
-.ins-foot .meta .e { display: inline-flex; align-items: center; gap: 4px; }
-.ins-foot .meta .e svg { width: 16px; height: 16px; }
-.ins-foot .meta i { width: 4px; height: 4px; border-radius: 50%; background: #6fb0ff; }
-
-.ins-circuit-bl, .ins-circuit-br {
-  position: absolute;
-  bottom: 0;
-  width: 180px;
-  height: 130px;
-  color: rgba(255, 255, 255, 0.16);
-  pointer-events: none;
-}
-.ins-circuit-bl { left: 0; }
-.ins-circuit-br { right: 0; transform: scaleX(-1); }
-
-
 
 /* =====================================================
    9. AMÉLIORATION VISUELLE — animations douces sans modifier
@@ -392,49 +228,6 @@
   position: relative;
   overflow: hidden;
 }
-.inscription .ins-bandeau {
-  min-height: 260px;
-  padding: 54px 20px 92px;
-  text-align: center;
-  isolation: isolate;
-  background: linear-gradient(125deg, #061d49 0%, #073b88 52%, #0759c9 100%);
-}
-.inscription .ins-bandeau::before,
-.inscription .ins-bandeau::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  left: -10%; width: 120%; height: 125px;
-  border-radius: 50% 50% 0 0 / 55% 55% 0 0;
-}
-.inscription .ins-bandeau::before {
-  bottom: -78px;
-  background: linear-gradient(90deg, rgba(28, 122, 255, .45), rgba(91, 188, 255, .18));
-  transform: rotate(-2deg);
-  animation: vague-lente 12s ease-in-out infinite alternate;
-}
-.inscription .ins-bandeau::after {
-  bottom: -95px;
-  background: #f5f9ff;
-  transform: rotate(2deg);
-}
-.inscription .ins-bandeau-glow {
-  position: absolute;
-  z-index: -1;
-  width: 340px; height: 260px;
-  right: -70px; top: -90px;
-  background: rgba(33, 151, 255, .22);
-  filter: blur(42px);
-  border-radius: 50%;
-  animation: halo-pulse 7s ease-in-out infinite alternate;
-}
-.inscription .ins-circuit { width: 210px; height: 155px; color: rgba(67, 178, 255, .58); animation: circuit-flottant 8s ease-in-out infinite alternate; }
-.inscription .ins-bandeau-texte { max-width: 800px; }
-.inscription .ins-sur-titre { margin: 0 0 12px; color: #8dd4ff; font-size: .76rem; font-weight: 700; letter-spacing: .2em; }
-.inscription .ins-bandeau h1 { font-size: clamp(2rem, 5vw, 3.1rem); letter-spacing: -.035em; text-shadow: 0 5px 24px rgba(0,0,0,.18); }
-.inscription .ins-bandeau h1::first-letter { color: #fff; }
-.inscription .ins-bandeau .ins-slogan { margin-top: 10px; color: #d6eaff; font-size: clamp(.95rem, 2.3vw, 1.15rem); }
 .inscription .ins-contenu { max-width: 850px; margin-top: -44px; z-index: 2; }
 .inscription .carte {
   position: relative;
@@ -485,14 +278,8 @@
 .inscription .valeur:hover .valeur-icone { transform: translateY(-4px) rotate(-4deg); background: #d5e7ff; }
 .inscription .valeur h3 { margin: 9px 0 4px; color: #0b3477; font-size: .95rem; }
 .inscription .valeur p { max-width: 220px; margin: 0 auto; color: #657895; font-size: .8rem; line-height: 1.6; }
-.ins-foot { background: linear-gradient(125deg, #061d49, #073b88 55%, #0759c9); }
 @keyframes carte-entree { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes vague-lente { from { transform: translateX(-2%) rotate(-2deg); } to { transform: translateX(2%) rotate(1deg); } }
-@keyframes halo-pulse { from { opacity: .55; transform: scale(.92); } to { opacity: 1; transform: scale(1.08); } }
-@keyframes circuit-flottant { from { transform: translateY(-4px); opacity: .65; } to { transform: translateY(7px); opacity: 1; } }
 @media (max-width: 640px) {
-  .inscription .ins-bandeau { min-height: 220px; padding: 40px 16px 78px; }
-  .inscription .ins-circuit { width: 115px; height: 95px; opacity: .6; }
   .inscription .ins-contenu { margin-top: -38px; padding-bottom: 32px; }
   .inscription .carte { border-radius: 20px; padding: 36px 17px 26px; }
   .inscription .carte-embleme { width: 60px; height: 60px; margin-top: -64px; }
@@ -506,37 +293,3 @@
 }
 
 
-/* ---------- Illustration ordinateur portable dans le bandeau ---------- */
-.inscription .ins-bandeau-texte {
-  z-index: 2;
-  width: min(100%, 850px);
-  margin-left: max(3%, calc((100% - 980px) / 2));
-  margin-right: auto;
-  padding-right: clamp(150px, 23vw, 270px);
-}
-.inscription .ins-bandeau .ins-laptop {
-  position: absolute;
-  z-index: 1;
-  width: clamp(170px, 24vw, 270px);
-  right: clamp(12px, 4vw, 62px);
-  top: 50%;
-  transform: translateY(-43%);
-  pointer-events: none;
-  filter: drop-shadow(0 12px 20px rgba(0, 10, 45, .35));
-  animation: laptop-apparition .9s ease-out both;
-}
-.inscription .ins-laptop svg { display: block; width: 100%; height: auto; overflow: visible; }
-.inscription .ins-laptop .laptop-float { transform-origin: center; animation: laptop-flottant 5s ease-in-out infinite; }
-@keyframes laptop-apparition { from { opacity: 0; translate: 18px 8px; } to { opacity: 1; translate: 0 0; } }
-@keyframes laptop-flottant { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-@media (max-width: 760px) {
-  .inscription .ins-bandeau-texte { width: 100%; margin: 0 auto; padding: 0 10px; }
-  .inscription .ins-bandeau .ins-laptop { width: 112px; right: 4px; top: auto; bottom: 48px; opacity: .35; transform: none; }
-  .inscription .ins-bandeau h1 { max-width: 100%; font-size: clamp(1.65rem, 6vw, 2.25rem); }
-}
-@media (max-width: 480px) {
-  .inscription .ins-bandeau .ins-laptop { width: 86px; right: 0; bottom: 38px; opacity: .22; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .inscription .ins-laptop, .inscription .ins-laptop .laptop-float { animation: none !important; }
-}

@@ -2,7 +2,8 @@
 
 Revue faite le 18/10/2026 sur toutes les branches du dépôt GitHub (`main`, `commun/normalisation`,
 `commun/photo-signataires`, `equipe1-2/connexion`, `equipe5/signatures-dut1`, `equipe6/bases`, `revert-1-patch-4`).
-Les corrections sont sur la branche **`commun/uniformisation`** (voir [evolution.md](evolution.md) pour l'état du travail).
+Les corrections sont sur la branche **`commun/uniformisation`** (fusionnée dans `main`), puis **`commun/maquette-unique`**
+(maquette unique, tutoiement, fin du travail des équipes 5 et 6 ; voir [evolution.md](evolution.md) pour l'état du travail).
 
 Légende : 🔴 bloquant (le site plante ou ne fait pas ce qu'il doit) · 🟠 nuit à la cohésion · 🟡 mauvaise pratique · ✅ corrigé dans `commun/uniformisation`.
 
@@ -37,10 +38,10 @@ avec le reste du site** : le code a été écrit comme s'il n'existait ni `inclu
   existe (Équipe 6). Deux portes d'entrée avec des règles différentes (60 s de blocage contre 5 min).
 - 🟠 ✅ Réécriture de fonctions communes : session, recherche de doublon de nom d'utilisateur, vérification de photo,
   réponse JSON… au lieu d'appeler `includes/fonctions.php` et `includes/auth.php` (CONTRIBUTING §5 : « on les appelle, on ne les réécrit pas »).
-- 🟠 Les CSS des équipes 1-2 redéfinissent des sélecteurs globaux (`.btn`, `.card`, `input`, `label`, `footer`) au lieu de
+- 🟠 ✅ Les CSS des équipes 1-2 redéfinissent des sélecteurs globaux (`.btn`, `.card`, `input`, `label`, `footer`) au lieu de
   préfixer leurs classes. Ça marche tant que ces pages ne chargent pas `style.css`, mais **le jour où on les met sous
-  `header.php`, tout se mélange**. Non corrigé (choix de maquette de l'équipe) : voir §6.
-- 🟠 Tutoiement sur les pages des équipes 1-2 et 5, vouvoiement dans le code commun et l'admin. À uniformiser (décision du groupe).
+  `header.php`, tout se mélange**. Corrigé : leur maquette est devenue la maquette commune (`style.css`), le reste est préfixé (`espace-`) ou limité à `.inscription`.
+- 🟠 ✅ Tutoiement sur les pages des équipes 1-2 et 5, vouvoiement dans le code commun et l'admin. Décision : on tutoie partout.
 
 ### Mauvaises pratiques
 
@@ -48,7 +49,7 @@ avec le reste du site** : le code a été écrit comme s'il n'existait ni `inclu
 - 🟡 ✅ Liens écrits en dur (`href="connexion-dut1.html"`, `ROUTES` dans `accueil.js`) : cassés dès que l'adresse change. Ils passent maintenant par `url()`.
 - 🟡 ✅ Script et style dans le HTML (`<script>document.documentElement.classList.add('js')</script>`, `style="padding-right:76px"`), contraire au CONTRIBUTING.
 - 🟡 ✅ Fautes : `data-connexion="connection-parrain.html"`, `<div class="menu">` jamais fermé dans l'accueil DUT1.
-- 🟡 Noms de variables JS en anglais (`say`, `invalid`, `username`, `show`) alors que la convention est le français.
+- 🟡 ✅ Noms de variables JS en anglais (`say`, `invalid`, `username`, `show`) alors que la convention est le français.
 - 🟡 Un seul commit de 2 448 lignes, sans préfixe `[Équipe N]`, branche `equipe1-2/connexion` qui mélange deux équipes :
   impossible de relire ou d'annuler une partie seulement.
 - 🟡 Le commentaire de `inscription.css` dit « ce fichier se charge APRÈS style.css », ce qui était faux.
@@ -83,11 +84,11 @@ partout, JS échappé (`esc()`), API documentée (`signatures_api.md`) avec un e
 - 🟠 ✅ Dépendait de `commun/photo-signataires` (ajout de `p.photo` dans `signataires_du_filleul()`), elle aussi non
   fusionnée : les photos étaient toujours `null`. Les deux branches sont fusionnées dans `commun/uniformisation`.
 - 🟠 ✅ Conflit sur `assets/css/style.css` avec la section de l'Équipe 6 (les deux ajoutaient à la fin du fichier). Résolu en gardant les deux.
-- 🟠 `OBJECTIF_SIGNATURES = 120` est une règle métier décidée par une seule équipe. Si l'accueil DUT1 (Équipe 3)
-  affiche une progression, il faudra la même valeur : à déplacer dans `includes/signatures.php`.
-- 🟡 Colonne « Promotion » qui affiche toujours 2027 (la base n'a pas cette colonne) : inutile, à retirer ou à remplacer.
+- 🟠 ✅ `OBJECTIF_SIGNATURES = 120` est une règle métier décidée par une seule équipe. Si l'accueil DUT1 (Équipe 3)
+  affiche une progression, il faudra la même valeur. Déplacée dans `includes/signatures.php`.
+- 🟡 ✅ Colonne « Promotion » qui affiche toujours 2027 (la base n'a pas cette colonne) : inutile, à retirer ou à remplacer.
 - 🟡 Variables JS en anglais (`rank`, `name`, `state`, `PER_PAGE`).
-- 🟡 `signatures_api.md` recommande un `test_connexion.php` qui ouvre une session sans mot de passe : il n'a plus
+- 🟡 ✅ `signatures_api.md` recommande un `test_connexion.php` qui ouvre une session sans mot de passe : il n'a plus
   lieu d'être maintenant que la connexion fonctionne, et il serait dangereux s'il était commité par erreur.
 
 ---
@@ -97,17 +98,17 @@ partout, JS échappé (`esc()`), API documentée (`signatures_api.md`) avec un e
 Travail propre et conforme : CSRF partout, requêtes préparées, `exiger_role('admin')`, double confirmation avant
 suppression, suspension plutôt que suppression, réutilisation de `enregistrer_signature()` pour l'ajout manuel.
 
-- 🔴 **Travail local non envoyé** : sur le poste où la revue a été faite, un *stash* (`stash@{0}`, barre latérale
+- 🔴 ✅ **Travail local non envoyé** : sur le poste où la revue a été faite, un *stash* (`stash@{0}`, barre latérale
   `admin_debut()` / `admin_fin()` / `admin_icone()`, en-tête modifié) et quatre fichiers non suivis
   (`admin/classement.php`, `admin/telechargements.php`, `admin/deconnexion.php`, `sql/donnees_test.sql`).
   `classement.php` et `telechargements.php` appellent des fonctions qui n'existent que dans le stash :
-  **les pousser seuls provoquerait une erreur fatale**. Ils n'ont pas été touchés par cette revue.
-- 🟠 Le stash modifie `includes/header.php` (fichier Commun) : à passer par une PR Commun.
-- 🟠 `admin/deconnexion.php` (non suivi) fait `session_start()` après `fermer_session()` : avec la correction commune
+  **les pousser seuls provoquerait une erreur fatale**. Intégrés ensemble dans `commun/maquette-unique`.
+- 🟠 ✅ Le stash modifie `includes/header.php` (fichier Commun) : à passer par une PR Commun.
+- 🟠 ✅ `admin/deconnexion.php` (non suivi) fait `session_start()` après `fermer_session()` : avec la correction commune
   (§5), cette ligne doit être retirée. Il fait de toute façon doublon avec `connexion/deconnexion.php`, qui gère aussi l'admin.
-- 🟠 Le rang est calculé à **cinq endroits** de cinq façons : `rang_filleul()` (SQL, DUT1 actifs), `lire_classement()`
+- 🟠 ✅ Le rang est calculé à **cinq endroits** de cinq façons : `rang_filleul()` (SQL, DUT1 actifs), `lire_classement()`
   (Équipe 5, actifs), `admin/index.php`, `admin/classement.php`, `admin/telechargements.php` (tous les DUT1, suspendus compris).
-  L'admin et le DUT1 ne voient donc pas le même rang. → une seule fonction commune `classement_filleuls()`.
+  L'admin et le DUT1 ne voient donc pas le même rang. → une seule fonction commune `classement_filleuls()`, utilisée partout.
 - 🟡 `header('Location: ' . admin_url(…)); exit;` répété au lieu d'une fonction ; mineur.
 - 🟡 `donnees_test.sql` commence par `DELETE FROM` sur toutes les tables : à ne jamais exécuter sur la vraie base.
 
@@ -119,9 +120,11 @@ suppression, suspension plutôt que suppression, réutilisation de `enregistrer_
   « Vous êtes déconnecté » ou « Votre compte n'est plus actif » était **toujours perdu**. Corrigé : l'identifiant de
   session est changé et la session reste ouverte, vide.
 - ✅ Ajout de `lire_flash()` pour les pages qui ont leur propre maquette (connexion, inscription).
-- 🟠 Un parrain connecté qui ouvre une page DUT1 reçoit « Connectez-vous pour accéder à cette page » alors qu'il est
-  connecté : message trompeur, à adapter dans `exiger_role()`.
-- 🟡 `init.php` ne capture pas l'erreur si MySQL est arrêté : avec `display_errors` activé, la trace affiche le DSN
+- 🔴 ✅ `verifier_csrf()` acceptait un formulaire **sans jeton** quand la session n'en avait pas encore
+  (`hash_equals('', '')` est vrai) : un formulaire envoyé depuis un autre site passait. Le jeton vide est maintenant refusé.
+- 🟠 ✅ Un parrain connecté qui ouvre une page DUT1 reçoit « Connectez-vous pour accéder à cette page » alors qu'il est
+  connecté : message trompeur. Il revient maintenant sur son accueil avec « Cette page n'est pas accessible avec ton compte ».
+- 🟡 ✅ `init.php` ne capture pas l'erreur si MySQL est arrêté : avec `display_errors` activé, la trace affiche le DSN
   et l'utilisateur MySQL. Un `try/catch` avec un message neutre et `error_log()` suffirait.
 - 🟡 Les limites de tentatives de connexion (équipes 2 et 6) sont stockées dans la session : il suffit d'effacer ses
   cookies pour les contourner. Suffisant pour un projet d'école, mais à savoir (vraie protection : table des tentatives par IP).
@@ -138,13 +141,13 @@ suppression, suspension plutôt que suppression, réutilisation de `enregistrer_
    (CONTRIBUTING §1, étape 2) empêcherait aussi les fusions sans approbation.
 3. **Tester avec de vraies données.** Les modes « démo » donnent l'impression que tout marche alors que le serveur n'a
    jamais été appelé. `sql/donnees_test.sql` (Équipe 6) devrait être commité pour que tout le monde teste sur la même base.
-4. **Deux identités visuelles.** Les équipes 1-2 (Poppins, bleu nuit, bandeaux) et 5 ont une maquette riche ; le reste
+4. ✅ **Deux identités visuelles.** Les équipes 1-2 (Poppins, bleu nuit, bandeaux) et 5 ont une maquette riche ; le reste
    du site utilise `style.css` (sobre). Le groupe doit choisir : soit adopter la maquette des équipes 1-2 dans
    `style.css` + `header.php` pour tout le monde, soit ramener les pages publiques à `style.css`. Les deux en même temps
-   donnent un site qui change d'apparence d'une page à l'autre.
+   donnent un site qui change d'apparence d'une page à l'autre. **Décidé : maquette des équipes 1-2 partout.**
 5. **Une branche = une équipe = un sujet**, et des commits courts : `equipe1-2/connexion` (un commit de 2 448 lignes)
    et `patch-4` sur un fork rendent la relecture impossible.
 6. **Branches à nettoyer** : `commun/normalisation` et `equipe6/bases` (déjà fusionnées), `revert-1-patch-4`
    (abandonnée), puis `commun/photo-signataires` et `equipe5/signatures-dut1` une fois `commun/uniformisation` fusionnée.
-7. Le langage (tu/vous), le format des dates (`d/m/Y H:i` en admin, `2026-10-20 14:32` côté Équipe 5) et les libellés
-   des types (`Mame1` affiché brut) gagneraient à être fixés une fois pour toutes dans le CONTRIBUTING.
+7. Le langage (tu/vous : ✅ tutoiement), le format des dates (`d/m/Y H:i` en admin, `2026-10-20 14:32` côté Équipe 5) et les libellés
+   des types (✅ `libelle_type()`, réglés par l'admin) gagneraient à être fixés une fois pour toutes dans le CONTRIBUTING. Reste : le format des dates.

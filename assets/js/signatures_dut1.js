@@ -18,7 +18,7 @@ const MY_LINK = new URL(page.dataset.lienSignature, location.origin).href;
 function versListe(signataires) {
   return signataires.map((s) => ({
     name: `${s.nom} ${s.prenom}`,
-    role: s.type_parrain,
+    role: s.type_libelle || s.type_parrain,  // libellé réglé par l'admin (ex. « Mame 1 »)
     date: s.date,          // "2026-10-20 14:32", du plus récent au plus ancien
     photo: s.photo,        // adresse de la photo ou null
     whatsapp: s.whatsapp,  // lien https://wa.me/… ou null (le numéro n'est jamais envoyé)

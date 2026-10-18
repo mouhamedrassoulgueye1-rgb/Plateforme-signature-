@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($nouvelle !== null) {
                 $ancienne_photo = $photo;
                 $photo = $nouvelle;
-            } elseif (!empty($_POST['retirer_photo'])) {
+            } elseif (!empty($_POST['retirer_photo']) && !PHOTO_OBLIGATOIRE[$c['role']]) {
                 $ancienne_photo = $photo;
                 $photo = null;
             }
@@ -57,13 +57,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $titre_page = 'Modifier ' . $c['prenom'] . ' ' . $c['nom'];
-require __DIR__ . '/../includes/header.php';
+admin_debut($titre_page, 'utilisateurs');
 ?>
 <p><a href="<?= e(admin_url('utilisateur_voir.php', $c['role'], $c['id'])) ?>">← Fiche</a></p>
 <section class="carte">
     <h1><?= e($titre_page) ?></h1>
     <?php if ($erreurs): ?>
-        <div class="alerte alerte-erreur">Corrigez les champs signalés.</div>
+        <div class="alerte alerte-erreur">Corrige les champs signalés.</div>
     <?php endif; ?>
     <form class="formulaire" method="post" enctype="multipart/form-data" autocomplete="off">
         <?= champ_csrf() ?>
@@ -88,7 +88,11 @@ require __DIR__ . '/../includes/header.php';
             <label for="photo">Nouvelle photo (facultative)</label>
             <?php if ($c['photo']): ?>
                 <img class="avatar" src="<?= e(url($c['photo'])) ?>" alt="Photo actuelle">
-                <label class="petit"><input type="checkbox" name="retirer_photo" value="1"> Retirer la photo actuelle</label>
+                <?php if (!PHOTO_OBLIGATOIRE[$c['role']]): ?>
+                    <label class="petit"><input type="checkbox" name="retirer_photo" value="1"> Retirer la photo actuelle</label>
+                <?php endif; ?>
+            <?php elseif (PHOTO_OBLIGATOIRE[$c['role']]): ?>
+                <span class="admin-erreur-champ">Ce DUT1 n’a pas encore de photo : ajoute-la.</span>
             <?php endif; ?>
             <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp">
             <?php if (isset($erreurs['photo'])): ?><span class="admin-erreur-champ"><?= e($erreurs['photo']) ?></span><?php endif; ?>
@@ -97,4 +101,4 @@ require __DIR__ . '/../includes/header.php';
     </form>
     <p class="petit">Pour changer le mot de passe : <a href="<?= e(admin_url('mot_de_passe.php', $c['role'], $c['id'])) ?>">nouveau mot de passe</a>.</p>
 </section>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php admin_fin(); ?>

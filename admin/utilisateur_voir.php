@@ -13,7 +13,7 @@ if ($c['role'] === 'dut1') {
 }
 
 $titre_page = $c['prenom'] . ' ' . $c['nom'];
-require __DIR__ . '/../includes/header.php';
+admin_debut($titre_page, 'utilisateurs');
 ?>
 <p><a href="<?= e(url('admin/utilisateurs.php')) ?>">← Utilisateurs</a></p>
 <section class="carte admin-fiche">
@@ -26,7 +26,7 @@ require __DIR__ . '/../includes/header.php';
         <h1><?= e($titre_page) ?></h1>
         <p>
             <span class="admin-badge admin-badge-<?= e($c['statut_compte']) ?>"><?= e($c['statut_compte']) ?></span>
-            <?= e($c['role'] === 'dut1' ? 'DUT1' : $c['type_parrain']) ?>
+            <?= e($c['role'] === 'dut1' ? 'DUT1' : libelle_type($c['type_parrain'])) ?>
         </p>
         <dl class="admin-infos">
             <dt>Nom d’utilisateur</dt><dd><?= e($c['nom_utilisateur']) ?></dd>
@@ -61,7 +61,7 @@ require __DIR__ . '/../includes/header.php';
                 <?php foreach ($liste as $l): $autre = $c['role'] === 'dut1' ? ['parrain', $l['id_parrain']] : ['dut1', $l['id_filleul']]; ?>
                     <tr>
                         <td><a href="<?= e(admin_url('utilisateur_voir.php', $autre[0], (int) $autre[1])) ?>"><?= e($l['prenom'] . ' ' . $l['nom']) ?></a></td>
-                        <?php if ($c['role'] === 'dut1'): ?><td><?= e($l['type_parrain']) ?></td><td><?= e($l['chambre']) ?></td><?php endif; ?>
+                        <?php if ($c['role'] === 'dut1'): ?><td><?= e(libelle_type($l['type_parrain'])) ?></td><td><?= e($l['chambre']) ?></td><?php endif; ?>
                         <td><a href="<?= e(lien_whatsapp($l['telephone'])) ?>" target="_blank" rel="noopener"><?= e($l['telephone']) ?></a></td>
                         <td><?= e(date('d/m/Y H:i', strtotime($l['date_signature']))) ?></td>
                     </tr>
@@ -71,4 +71,4 @@ require __DIR__ . '/../includes/header.php';
         </div>
     <?php endif; ?>
 </section>
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<?php admin_fin(); ?>

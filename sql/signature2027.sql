@@ -9,6 +9,7 @@
 -- =============================================================================================
 
 CREATE DATABASE IF NOT EXISTS signature2027 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET NAMES utf8mb4;
 USE signature2027;
 
 CREATE TABLE IF NOT EXISTS parrain (
@@ -57,7 +58,19 @@ CREATE TABLE IF NOT EXISTS administrateur (
   mot_de_passe    VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB;
 
--- Premier administrateur : générez le hash du mot de passe, puis remplacez <HASH> :
---   php -r "echo password_hash('votre_mot_de_passe', PASSWORD_DEFAULT);"
+-- Libellés affichés des types de parrain, modifiables par l'admin (admin/libelles.php).
+-- La valeur enregistrée dans parrain.type_parrain ne change pas ; seul le texte affiché change.
+-- Base déjà créée avant cet ajout : exécuter seulement ce bloc dans phpMyAdmin.
+CREATE TABLE IF NOT EXISTS libelle_type (
+  type_parrain ENUM('Parrain','Marraine','Mame1','Mame2','Mame3','Alumni') PRIMARY KEY,
+  libelle      VARCHAR(40) NOT NULL
+) ENGINE=InnoDB;
+
+INSERT IGNORE INTO libelle_type (type_parrain, libelle) VALUES
+  ('Parrain', 'Parrain'), ('Marraine', 'Marraine'), ('Mame1', 'Mame 1'),
+  ('Mame2', 'Mame 2'), ('Mame3', 'Mame 3'), ('Alumni', 'Alumni');
+
+-- Premier administrateur : génère le hash du mot de passe, puis remplace <HASH> :
+--   php -r "echo password_hash('ton_mot_de_passe', PASSWORD_DEFAULT);"
 -- INSERT INTO administrateur (nom, prenom, nom_utilisateur, mot_de_passe)
 -- VALUES ('Nom', 'Prénom', 'admin', '<HASH>');

@@ -121,16 +121,7 @@ champs.forEach(function (champ) {
   });
 });
 
-/* ---------- 4. Boutons "œil" pour montrer ou cacher le mot de passe ---------- */
-document.querySelectorAll(".oeil").forEach(function (bouton) {
-  bouton.addEventListener("click", function () {
-    const champ = document.getElementById(bouton.dataset.cible);
-    const visible = champ.type === "text";
-    champ.type = visible ? "password" : "text";
-    bouton.setAttribute("aria-pressed", String(!visible));
-    bouton.setAttribute("aria-label", visible ? "Afficher le mot de passe" : "Cacher le mot de passe");
-  });
-});
+/* ---------- 4. Bouton « Afficher » du mot de passe : géré par main.js (commun) ---------- */
 
 /* ---------- 5. Aperçu de la photo choisie ---------- */
 const champPhoto = document.getElementById("photo");

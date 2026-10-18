@@ -4,12 +4,11 @@
  * et outils de leurs API JSON (dut1/signatures_api.php, dut1/classement_api.php).
  *
  * Lecture seule : les signatures sont enregistrées ailleurs, par enregistrer_signature().
- * Le nombre, le rang, le total et la liste des signataires viennent des fonctions communes de
+ * Le nombre, le rang, le classement, le total et la liste des signataires viennent des fonctions communes de
  * includes/signatures.php : on les appelle, on ne les réécrit pas (CONTRIBUTING.md, §5).
  */
 
-/** Objectif de signatures d'un DUT1 : 100 % de progression sur les deux pages. */
-const OBJECTIF_SIGNATURES = 120;
+// OBJECTIF_SIGNATURES et classement_filleuls() sont communs : includes/signatures.php.
 
 // ---------------------------------------------------------------------------------------------
 // Données des pages
@@ -28,6 +27,7 @@ function lire_donnees_signatures(PDO $pdo, int $id_filleul): array
             'nom'          => $p['nom'],
             'prenom'       => $p['prenom'],
             'type_parrain' => $p['type_parrain'],
+            'type_libelle' => libelle_type($p['type_parrain']),
             'chambre'      => $p['chambre'],
             // Chemin complet (avec BASE_URL) pour que l'image s'affiche quelle que soit la page
             'photo'        => !empty($p['photo']) ? url($p['photo']) : null,
@@ -54,35 +54,17 @@ function lire_donnees_signatures(PDO $pdo, int $id_filleul): array
  */
 function lire_classement(PDO $pdo, int $id_filleul): array
 {
-    $req = $pdo->prepare(
-        "SELECT f.id_filleul, f.nom, f.prenom, f.photo, COUNT(s.id_parrain) AS nb_signatures
-         FROM filleul f LEFT JOIN signature s ON s.id_filleul = f.id_filleul
-         WHERE f.statut_compte = 'actif'
-         GROUP BY f.id_filleul, f.nom, f.prenom, f.photo
-         ORDER BY nb_signatures DESC, f.nom, f.prenom"
-    );
-    $req->execute();
-
     $classement = [];
-    $rang = 0;
-    $precedent = null;
-    foreach ($req->fetchAll() as $i => $l) {
-        $nb = (int) $l['nb_signatures'];
-        // Même règle que rang_filleul() : les ex æquo ont le même rang (10, 8, 8, 5 → 1, 2, 2, 4)
-        if ($nb !== $precedent) {
-            $rang = $i + 1;
-            $precedent = $nb;
-        }
+    foreach (classement_filleuls($pdo) as $l) {
         $classement[] = [
-            'rang'          => $rang,
+            'rang'          => $l['rang'],
             'nom'           => $l['nom'],
             'prenom'        => $l['prenom'],
             'photo'         => !empty($l['photo']) ? url($l['photo']) : null,
-            'nb_signatures' => $nb,
+            'nb_signatures' => $l['nb_signatures'],
             'moi'           => (int) $l['id_filleul'] === $id_filleul,
         ];
     }
-
     $nombres = array_column($classement, 'nb_signatures');
     return [
         'objectif'     => OBJECTIF_SIGNATURES,

@@ -27,6 +27,9 @@ Tant que l'étape 1 n'est pas fusionnée, aucune équipe ne commence ses pages :
 | Signature | table `signature` (`id_parrain`, `id_filleul`, `date_signature`) | | |
 
 Valeurs de `type_parrain`, écrites exactement ainsi : `Parrain`, `Marraine`, `Mame1`, `Mame2`, `Mame3`, `Alumni` (constante `TYPES_PARRAIN`).
+On n'affiche jamais la valeur brute : `libelle_type($type)` donne le texte réglé par l'admin (`admin/libelles.php`, ex. « Mame 1 »).
+
+**Ton du site : on tutoie partout** (messages, boutons, erreurs, pages admin comprises) : « Connecte-toi », « Corrige les champs signalés ».
 
 ## 3. Modèle de page (à copier)
 
@@ -43,11 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 3. si pas d'erreur : requête préparée, flash('succes', '…'), rediriger('dut1/accueil.php');
 }
 
-$titre_page = 'Titre de la page';
+$titre_page = 'Titre de la page';                                   // titre de l'onglet
+$bandeau = ['titre' => 'Titre de la page', 'texte' => 'Une phrase.']; // grand bandeau bleu (facultatif)
+$styles_page = ['assets/css/ma_page.css'];                          // CSS propre à la page (facultatif)
+$scripts_page = ['assets/js/ma_page.js'];                           // JS propre à la page (facultatif)
 require __DIR__ . '/../includes/header.php';
 ?>
 <section class="carte">
-    <h1><?= e($titre_page) ?></h1>
     <form class="formulaire" method="post" enctype="multipart/form-data">
         <?= champ_csrf() ?>
         <div class="champ">
@@ -62,10 +67,14 @@ require __DIR__ . '/../includes/header.php';
 
 Règle : le traitement PHP en haut, le HTML en bas. Après un POST réussi, toujours `rediriger()` (pas de double envoi en actualisant).
 
-Pages publiques avec leur propre maquette (`espace/`, `connexion/`, `inscription/`) : elles n'incluent pas
-`header.php` / `footer.php`, mais commencent quand même par `init.php`, écrivent tous leurs liens avec `url()`
-et affichent les messages avec `lire_flash()`. Leur CSS est dans un fichier à part (`assets/css/connexion.css`…),
-jamais chargé par les autres pages. Aucune page ne doit ouvrir sa propre connexion PDO ou redéfinir une fonction commune.
+**Une seule maquette** (celle des équipes 1-2) : toutes les pages passent par `header.php` / `footer.php`
+(barre blanche avec logo, bandeau bleu à vagues, pied de page marine). Avec `$bandeau`, la première `.carte`
+chevauche le bandeau. Classes communes à utiliser : `.carte` (`.carte-etroite` pour un formulaire seul), `.btn`
+(`.btn-large`, `.btn-secondaire`, `.btn-danger`), `.champ`, `.champ-mdp` + `<button type="button" class="oeil" data-cible="id">Afficher</button>`,
+`.alerte-…`, `.tableau`, `.petit`. Une page pleine largeur (bandeau photo des pages `espace/`) met `$classe_main = 'conteneur-plein'`.
+Aucune page ne doit ouvrir sa propre connexion PDO, avoir son propre en-tête ou redéfinir une fonction commune.
+
+**Photo** : obligatoire pour un DUT1 (inscription et création par l'admin), facultative pour un parrain (constante `PHOTO_OBLIGATOIRE`).
 
 ## 4. Conventions de nommage
 
@@ -97,8 +106,9 @@ Ces fonctions sont communes : on les appelle, on ne les réécrit pas. Pour en c
 | `verifier_identifiants()`, `ouvrir_session()`, `exiger_role()`, `fermer_session()`, `utilisateur()` | `includes/auth.php` | Équipes 2, 3, 6 et toutes les pages protégées |
 | `enregistrer_signature()` (renvoie `ok`, `deja_signe`, `introuvable` ou `suspendu`) + `MESSAGES_SIGNATURE` | `includes/signatures.php` | Équipe 3 (box), Équipe 4 (QR code), Équipe 6 (ajout manuel) |
 | `nb_signatures_filleul()`, `rang_filleul()`, `nb_filleuls_actifs()`, `signataires_du_filleul()` | `includes/signatures.php` | Équipes 3 et 5 |
+| `classement_filleuls()` (même rang partout, ex æquo compris), `OBJECTIF_SIGNATURES` | `includes/signatures.php` | Équipes 3, 5 et 6 |
 | `nb_signatures_parrain()`, `filleuls_signes_par()` | `includes/signatures.php` | Équipe 4 |
-| `e()`, `url()`, `rediriger()`, `flash()`, `lire_flash()`, CSRF, validations, `enregistrer_photo()` | `includes/fonctions.php` | Tout le monde |
+| `e()`, `url()`, `rediriger()`, `flash()`, `lire_flash()`, CSRF, validations, `enregistrer_photo()`, `libelle_type()` | `includes/fonctions.php` | Tout le monde |
 
 Après une connexion réussie, on arrive sur : DUT1 → `dut1/accueil.php`, parrain → `parrain/accueil.php`, admin → `admin/index.php` (constante `ROLES`).
 
