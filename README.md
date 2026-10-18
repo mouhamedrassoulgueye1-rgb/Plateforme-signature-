@@ -7,10 +7,11 @@ Stack : HTML, CSS, JavaScript, PHP, MySQL.
 
 ## Installation locale
 
-1. Installer XAMPP et cloner le dépôt dans `C:\xampp\htdocs\signature2027`.
-2. Dans phpMyAdmin, exécuter `sql/signature2027.sql`.
-3. Copier `config/db.example.php` en `config/db.php` (ce fichier n'est pas versionné).
-4. Ouvrir http://localhost/signature2027
+1. Installe XAMPP et clone le dépôt dans `C:\xampp\htdocs\signature2027`.
+2. Dans phpMyAdmin, exécute `sql/signature2027.sql` (base déjà créée : exécute au moins le bloc `libelle_type`, ajouté le 18/10).
+3. Pour tester avec des données : exécute `sql/donnees_test.sql` (comptes `admin` / `admin2027`, DUT1 et parrains avec le mot de passe `motdepasse`). **Il vide les tables : jamais sur la vraie base.**
+4. Copie `config/db.example.php` en `config/db.php` (ce fichier n'est pas versionné).
+5. Ouvre http://localhost/signature2027
 
 ## Arborescence et responsables
 
@@ -22,11 +23,11 @@ Stack : HTML, CSS, JavaScript, PHP, MySQL.
 | `includes/fonctions.php` | Échappement, redirection, messages, CSRF, validations, photos | Commun |
 | `includes/auth.php` | Identifiants, session, protection des pages selon le rôle | Commun |
 | `includes/signatures.php` | Enregistrement d'une signature (refus des doublons), compteurs, rang, listes | Commun |
-| `includes/header.php`, `includes/footer.php` | En-tête et pied de page | Commun |
+| `includes/header.php`, `includes/footer.php` | En-tête (menu selon le rôle), bandeau et pied de page : la maquette unique du site | Commun |
 | `assets/css/style.css`, `assets/js/main.js` | Style et script communs | Commun |
 | `sql/signature2027.sql` | Création de la base | Commun |
 | `espace/dut1.php`, `espace/parrain.php` | Accueil public de chaque espace (boutons « Créer un compte » / « Se connecter ») | **Équipes 1-2** |
-| `assets/css/accueil.css`, `assets/js/accueil.js`, `assets/img/esp.jpg` | Style, menu et photo des pages `espace/` | **Équipes 1-2** |
+| `assets/css/espace.css`, `assets/js/espace.js`, `assets/img/esp.jpg` | Style, animation et photo des pages `espace/` | **Équipes 1-2** |
 | `inscription/dut1.php` | Inscription DUT1 | **Équipe 1** |
 | `inscription/parrain.php` | Inscription parrains, marraines, Mames | **Équipe 1** |
 | `inscription/fonctions_inscription.php` | Traitement commun aux deux inscriptions (validation, photo, enregistrement) | **Équipe 1** |
@@ -34,7 +35,7 @@ Stack : HTML, CSS, JavaScript, PHP, MySQL.
 | `connexion/dut1.php` | Connexion DUT1 | **Équipe 2** |
 | `connexion/parrain.php` | Connexion parrains, marraines, Mames | **Équipe 2** |
 | `connexion/fonctions_connexion.php` | Traitement commun aux deux connexions (limite de tentatives) | **Équipe 2** |
-| `assets/css/connexion.css`, `assets/js/connexion.js` | Style et script des pages de connexion | **Équipe 2** |
+| `assets/js/connexion.js` | Vérification des champs et indicateur d'envoi des pages de connexion | **Équipe 2** |
 | `connexion/deconnexion.php` | Déconnexion (tous les rôles) | **Équipe 2** |
 | `dut1/accueil.php` | Accueil DUT1 : compteur, bouton « Signer », QR code, checklist | **Équipe 3** |
 | `dut1/signer.php` | Box de signature (sur le téléphone du DUT1) + messages | **Équipe 3** |
@@ -63,6 +64,11 @@ Stack : HTML, CSS, JavaScript, PHP, MySQL.
 | `admin/utilisateur_supprimer.php` | Suppression d'un utilisateur | **Équipe 6** |
 | `admin/mot_de_passe.php` | Réinitialisation d'un mot de passe | **Équipe 6** |
 | `admin/signatures.php` | Ajout / retrait de signatures d'un DUT1 | **Équipe 6** |
+| `admin/classement.php` | Classement complet des DUT1 (recherche, pagination) | **Équipe 6** |
+| `admin/telechargements.php` | Exports CSV pour Excel (DUT1, signataires, signatures, classement) | **Équipe 6** |
+| `admin/libelles.php` | Libellés affichés des types (Parrain, Mame 1…) | **Équipe 6** |
+| `admin/deconnexion.php` | Déconnexion de l'administrateur | **Équipe 6** |
+| `sql/donnees_test.sql` | Base de test partagée (fausses personnes) — **locale uniquement, vide les tables** | **Équipe 6** |
 
 ## Fonctionnement de la signature
 
