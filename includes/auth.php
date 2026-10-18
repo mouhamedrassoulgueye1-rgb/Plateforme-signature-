@@ -76,20 +76,18 @@ function exiger_role(string $role): array
     $statut = $req->fetchColumn();
     if ($statut === false || ($role !== 'admin' && $statut !== 'actif')) {
         fermer_session();
-        session_start();
         flash('erreur', 'Votre compte n’est plus actif. Contactez l’administrateur.');
         rediriger($r['connexion']);
     }
     return $u;
 }
 
-/** Déconnexion complète. */
+/**
+ * Déconnexion complète : efface tout le contenu de la session et change son identifiant (l'ancien est détruit).
+ * La session reste ouverte, vide : on peut appeler flash() juste après (pas de session_start() à refaire).
+ */
 function fermer_session(): void
 {
     $_SESSION = [];
-    if (ini_get('session.use_cookies')) {
-        $p = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 3600, $p['path'], $p['domain'], $p['secure'], $p['httponly']);
-    }
-    session_destroy();
+    session_regenerate_id(true);
 }

@@ -13,8 +13,8 @@ require __DIR__ . '/includes/header.php';
     <h1>Signature 2027</h1>
     <p>Un lien aujourd’hui, une force demain !</p>
     <div class="groupe-boutons">
-        <a class="btn" href="<?= e(url('connexion/dut1.php')) ?>">Je suis DUT1</a>
-        <a class="btn btn-secondaire" href="<?= e(url('connexion/parrain.php')) ?>">Je suis parrain, marraine ou Mame</a>
+        <a class="btn" href="<?= e(url('espace/dut1.php')) ?>">Je suis DUT1</a>
+        <a class="btn btn-secondaire" href="<?= e(url('espace/parrain.php')) ?>">Je suis parrain, marraine ou Mame</a>
     </div>
     <p class="petit">
         Pas encore de compte ?
