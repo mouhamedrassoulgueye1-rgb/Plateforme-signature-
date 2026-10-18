@@ -1,28 +1,11 @@
 /* =====================================================
-   CONFIG : adapte les adresses à ton site
-   Les deux pages d'accueil (accueil-dut1.html et accueil-parrain.html)
-   utilisent ce même fichier : le profil est lu dans <body data-role="...">
+   Équipes 1-2 : pages espace/dut1.php et espace/parrain.php.
+   Les liens (inscription, connexion) sont écrits par le PHP avec url() :
+   ils fonctionnent en local (XAMPP) comme en production.
    ===================================================== */
-const ROUTES = {
-  dut1: {
-    signup: 'inscription-dut1.html',
-    login:  'connexion-dut1.html'
-  },
-  parrain: {
-    signup: 'inscription-parrain.html',
-    login:  'connexion-parrain.html'
-  }
-};
 
-const role = document.body.dataset.role;
-const r = ROUTES[role];
-if (r) {
-  const set = (id, href) => { const el = document.getElementById(id); if (el) el.href = href; };
-  set('goSignup', r.signup);
-  set('goLogin',  r.login);
-  set('mSignup',  r.signup);
-  set('mLogin',   r.login);
-}
+// Active les animations d'entrée (le CSS les réserve aux navigateurs avec JavaScript)
+document.documentElement.classList.add('js');
 
 /* =====================================================
    Menu (bouton hamburger)

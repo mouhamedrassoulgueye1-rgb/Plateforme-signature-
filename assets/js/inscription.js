@@ -1,17 +1,13 @@
 /* =====================================================
    SITE SIGNATURE 2027 - Validation du formulaire d'inscription
-   Utilisé par : inscription-dut1.html et inscription-parrain.html
+   Utilisé par : inscription/dut1.php et inscription/parrain.php
 
-   Rôle : vérifier les champs AVANT l'envoi. Le backend (PHP) devra
-   refaire ces vérifications, car le navigateur peut être contourné.
+   Rôle : vérifier les champs AVANT l'envoi. Le serveur (inscription/fonctions_inscription.php)
+   refait toutes ces vérifications, car le navigateur peut être contourné.
    ===================================================== */
 
-// true  = mode démonstration : le formulaire n'est pas envoyé, un message de succès s'affiche
-// false = le formulaire est envoyé au fichier PHP indiqué dans l'attribut "action"
-const MODE_DEMO = true;
-
 const TAILLE_MAX_PHOTO = 2 * 1024 * 1024;          // 2 Mo
-const TYPES_PHOTO = ["image/jpeg", "image/png"];  // JPG et PNG uniquement
+const TYPES_PHOTO = ["image/jpeg", "image/png", "image/webp"];  // mêmes formats que enregistrer_photo()
 const LONGUEUR_MIN_MDP = 8;
 
 const formulaire = document.getElementById("form-inscription");
@@ -30,7 +26,7 @@ function messageErreur(champ) {
       return champ.required ? "Choisis une photo de profil." : "";
     }
     if (!TYPES_PHOTO.includes(fichier.type)) {
-      return "La photo doit être au format JPG ou PNG.";
+      return "La photo doit être au format JPG, PNG ou WebP.";
     }
     if (fichier.size > TAILLE_MAX_PHOTO) {
       return "La photo ne doit pas dépasser 2 Mo.";
@@ -55,16 +51,17 @@ function messageErreur(champ) {
   switch (regle) {
     case "utilisateur":
       if (valeur.length < 3) return "Minimum 3 caractères.";
-      if (!/^[A-Za-z0-9._-]+$/.test(valeur)) {
-        return "Utilise seulement des lettres, chiffres, point, tiret ou underscore.";
+      // Même règle que nom_utilisateur_valide() : le serveur met le nom en minuscules
+      if (!/^[a-z0-9._]+$/.test(valeur.toLowerCase())) {
+        return "Utilise seulement des lettres, des chiffres, le point ou le tiret bas (_).";
       }
       return "";
 
     case "telephone": {
-      // On retire les espaces puis on teste : + suivi de 8 à 15 chiffres
-      const numero = valeur.replace(/\s+/g, "");
-      if (!/^\+[0-9]{8,15}$/.test(numero)) {
-        return "Format international attendu, par exemple +221 77 123 45 67.";
+      // Même règle que normaliser_telephone() : 9 chiffres (Sénégal) ou numéro avec indicatif
+      const numero = valeur.replace(/[\s().-]+/g, "");
+      if (!/^(\+|00)?[0-9]{9,15}$/.test(numero)) {
+        return "Numéro invalide, par exemple 77 123 45 67 ou +221 77 123 45 67.";
       }
       return "";
     }
@@ -180,60 +177,15 @@ formulaire.addEventListener("submit", function (evenement) {
     return;
   }
 
-  // Tout est correct
-  if (MODE_DEMO) {
-    evenement.preventDefault();
-    alerte.className = "alerte succes visible";
-    alerte.textContent = "compte créé avec succés…";
-
-    // En mode démonstration, aucune donnée n'est enregistrée.
-    // Une fois les champs validés, retour à la page d'accueil demandée.
-   window.setTimeout(function () {
-  var role = new URLSearchParams(window.location.search).get("role");
-  var accueil = {
-    dut1: "accueil-dut1.html",
-    parrain: "accueil-parrain.html"
-  };
-  window.location.href = accueil[role] || "accueil-dut1.html";
-}, 900);
-  }
-  // Pour un vrai enregistrement, passer MODE_DEMO à false et configurer le traitement PHP.
+  // Tout est correct : le formulaire part vers le serveur
 });
 
-/* ---------- 7. Messages renvoyés par le serveur (PHP) ---------- */
-/* Après le traitement, PHP renvoie vers cette page avec ?succes=1 ou ?erreur=code */
-const MESSAGES_SERVEUR = {
-  champ_invalide: "Certaines informations sont invalides. Vérifie le formulaire et réessaie.",
-  mdp_different: "Les deux mots de passe ne sont pas identiques.",
-  utilisateur_pris: "Ce nom d'utilisateur est déjà utilisé. Choisis-en un autre.",
-  photo_manquante: "Choisis une photo de profil.",
-  photo_invalide: "La photo doit être au format JPG ou PNG, 2 Mo maximum.",
-  erreur_serveur: "Une erreur est survenue sur le serveur. Réessaie dans un instant."
-};
-
-const parametres = new URLSearchParams(window.location.search);
-
-if (parametres.get("succes") === "1") {
-  alerte.className = "alerte succes visible";
-  alerte.textContent = "Inscription confirmée. Redirection vers l'accueil…";
-
-  // Seules ces deux pages sont autorisées comme destination
-  const accueil = {
-    dut1: "accueil-dut1.html",
-    parrain: "accueil-parrain.html"
-  };
-  const role = parametres.get("role");
-  const cible = Object.prototype.hasOwnProperty.call(accueil, role)
-    ? accueil[role]
-    : "accueil-dut1.html";
-
-  window.setTimeout(function () {
-    window.location.href = cible;
-  }, 900);
-} else if (parametres.has("erreur")) {
-}
-
-
+/* ---------- 7. Erreurs renvoyées par le serveur ---------- */
+/* Le PHP écrit le message sous le champ (p.message-erreur) : on marque le champ en rouge. */
+champs.forEach(function (champ) {
+  const zone = document.getElementById("err-" + champ.id);
+  if (zone && zone.textContent.trim() !== "") afficherErreur(champ, zone.textContent.trim());
+});
 
 /* ---------- 8. Entrée visuelle accessible (sans modifier les fonctions existantes) ---------- */
 (function animerEntreePage() {

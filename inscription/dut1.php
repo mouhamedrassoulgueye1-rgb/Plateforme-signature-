@@ -1,3 +1,17 @@
+<?php
+require_once __DIR__ . '/../includes/init.php';
+require_once __DIR__ . '/fonctions_inscription.php';
+
+// Déjà connecté : direction la page d'accueil de son rôle
+if ($u = utilisateur()) {
+    rediriger(ROLES[$u['role']]['accueil']);
+}
+
+$erreurs = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $erreurs = traiter_inscription($pdo, 'dut1');
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,8 +23,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- Feuille de style : inscription.css (même dossier que cette page) -->
-<link rel="stylesheet" href="inscription.css">
+<link rel="stylesheet" href="<?= e(url('assets/css/inscription.css')) ?>">
 </head>
 
 <body class="page-inscription">
@@ -29,12 +42,12 @@
 <!-- ============ EN-TETE ============ -->
 <header class="ins-top" id="top">
   <div class="ins-wrap">
-    <a class="ins-brand" href="connexion-dut1.html" aria-label="Site Signature 2027 - accueil">
+    <a class="ins-brand" href="<?= e(url('espace/dut1.php')) ?>" aria-label="Site Signature 2027 - accueil">
       <svg class="ins-logo" aria-hidden="true"><use href="#logo"/></svg>
       <b>SITE SIGNATURE <span>2027</span></b>
     </a>
     <nav class="ins-nav" aria-label="Navigation principale">
-      <a class="ins-home" href="connexion-dut1.html">
+      <a class="ins-home" href="<?= e(url('espace/dut1.php')) ?>">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3L12 3z"/></svg>Accueil
       </a>
     </nav>
@@ -90,37 +103,37 @@
       <h2>Formulaire DUT1</h2>
       <p class="intro">Crée ton compte pour recevoir les signatures de tes parrains, marraines et Mames. Les champs marqués d'une étoile sont obligatoires.</p>
 
-      <form id="form-inscription" method="post" action="inscription.php"
-              enctype="multipart/form-data" novalidate data-connexion="connexion-dut1.html">
+      <form id="form-inscription" method="post" enctype="multipart/form-data" novalidate>
+          <?= champ_csrf() ?>
 
           <div class="grille">
 
             <div class="champ">
               <label for="nom">Nom <span class="etoile">*</span></label>
-              <input type="text" id="nom" name="nom" required data-regle="texte" data-max="50"
+              <input type="text" id="nom" name="nom" value="<?= valeur_saisie('nom') ?>" required data-regle="texte" data-max="50"
                      placeholder="Entre ton nom" autocomplete="family-name" aria-describedby="err-nom">
-              <p class="message-erreur" id="err-nom" aria-live="polite"></p>
+              <p class="message-erreur" id="err-nom" aria-live="polite"><?= erreur_champ($erreurs, 'nom') ?></p>
             </div>
 
             <div class="champ">
               <label for="prenom">Prénom <span class="etoile">*</span></label>
-              <input type="text" id="prenom" name="prenom" required data-regle="texte" data-max="80"
+              <input type="text" id="prenom" name="prenom" value="<?= valeur_saisie('prenom') ?>" required data-regle="texte" data-max="80"
                      placeholder="Entre ton prénom" autocomplete="given-name" aria-describedby="err-prenom">
-              <p class="message-erreur" id="err-prenom" aria-live="polite"></p>
+              <p class="message-erreur" id="err-prenom" aria-live="polite"><?= erreur_champ($erreurs, 'prenom') ?></p>
             </div>
 
             <div class="champ">
               <label for="nom_utilisateur">Nom d'utilisateur <span class="etoile">*</span></label>
-              <input type="text" id="nom_utilisateur" name="nom_utilisateur" required data-regle="utilisateur" data-max="30"
+              <input type="text" id="nom_utilisateur" name="nom_utilisateur" value="<?= valeur_saisie('nom_utilisateur') ?>" required data-regle="utilisateur" data-max="30"
                      placeholder="Choisis un nom d'utilisateur" autocomplete="username" aria-describedby="err-nom_utilisateur">
-              <p class="message-erreur" id="err-nom_utilisateur" aria-live="polite"></p>
+              <p class="message-erreur" id="err-nom_utilisateur" aria-live="polite"><?= erreur_champ($erreurs, 'nom_utilisateur') ?></p>
             </div>
 
             <div class="champ">
               <label for="telephone">Téléphone <span class="etoile">*</span></label>
-              <input type="tel" id="telephone" name="telephone" required data-regle="telephone"
-                     placeholder="+221 77 123 45 67" autocomplete="tel" aria-describedby="err-telephone">
-              <p class="message-erreur" id="err-telephone" aria-live="polite"></p>
+              <input type="tel" id="telephone" name="telephone" value="<?= valeur_saisie('telephone') ?>" required data-regle="telephone"
+                     placeholder="77 123 45 67" autocomplete="tel" aria-describedby="err-telephone">
+              <p class="message-erreur" id="err-telephone" aria-live="polite"><?= erreur_champ($erreurs, 'telephone') ?></p>
             </div>
 
             <div class="champ">
@@ -132,7 +145,7 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
                 </button>
               </div>
-              <p class="message-erreur" id="err-mot_de_passe" aria-live="polite"></p>
+              <p class="message-erreur" id="err-mot_de_passe" aria-live="polite"><?= erreur_champ($erreurs, 'mot_de_passe') ?></p>
             </div>
 
             <div class="champ">
@@ -144,7 +157,7 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
                 </button>
               </div>
-              <p class="message-erreur" id="err-confirmation_mot_de_passe" aria-live="polite"></p>
+              <p class="message-erreur" id="err-confirmation_mot_de_passe" aria-live="polite"><?= erreur_champ($erreurs, 'confirmation_mot_de_passe') ?></p>
             </div>
 
             <div class="champ plein">
@@ -156,21 +169,21 @@
                 <div>
                   <label class="btn-photo">
                     Choisir une photo
-                    <input type="file" id="photo" name="photo" accept="image/jpeg,image/png" required data-regle="photo" aria-describedby="err-photo">
+                    <input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/webp" required data-regle="photo" aria-describedby="err-photo">
                   </label>
-                  <p class="aide-photo">Format JPG ou PNG, 2 Mo maximum.</p>
+                  <p class="aide-photo">Format JPG, PNG ou WebP, 2 Mo maximum.</p>
                 </div>
               </div>
-              <p class="message-erreur" id="err-photo" aria-live="polite"></p>
+              <p class="message-erreur" id="err-photo" aria-live="polite"><?= erreur_champ($erreurs, 'photo') ?></p>
             </div>
 
           </div>
 
           <button type="submit" class="btn">Créer mon compte</button>
-          <div class="alerte" id="alerte" role="status"></div>
+          <div class="alerte<?= $erreurs ? ' echec visible' : '' ?>" id="alerte" role="status"><?= $erreurs ? 'Certains champs sont à corriger avant de continuer.' : '' ?></div>
         </form>
 
-      <p class="lien-bas">Tu as déjà un compte ? <a href="connexion-dut1.html">Se connecter</a></p>
+      <p class="lien-bas">Tu as déjà un compte ? <a href="<?= e(url('connexion/dut1.php')) ?>">Se connecter</a></p>
     </div>
   </div>
 
@@ -195,6 +208,6 @@
   </div>
 </footer>
 
-<script src="inscription.js"></script>
+<script src="<?= e(url('assets/js/inscription.js')) ?>"></script>
 </body>
 </html>

@@ -1,180 +1,120 @@
 <?php
 /**
- * Traitement de l'inscription (DUT1 et parrains / marraines / Mames).
+ * Équipes 1-2 : traitement commun aux pages inscription/dut1.php et inscription/parrain.php.
  *
- * Placé à la RACINE du site, à côté de inscription-dut1.html et inscription-parrain.html.
- * Reçoit le formulaire en POST, enregistre le compte,
- * puis redirige vers la page d'inscription du même profil avec le résultat :
- *   ?succes=1&role=dut1|parrain        -> inscription.js redirige vers l'accueil
- *   ?erreur=<code>&role=dut1|parrain   -> inscription.js affiche le message du code
- *
- * Champs attendus (attribut name du formulaire) :
- *   role                    dut1 | parrain   (champ caché)
- *   nom, prenom, nom_utilisateur, telephone
- *   mot_de_passe, confirmation
- *   photo                   fichier image, facultatif
- *   type_parrain, niveau    uniquement si role = parrain
+ * Formats et règles : ceux de includes/fonctions.php (CONTRIBUTING.md, §4), pour que l'inscription,
+ * la connexion et l'administration acceptent exactement les mêmes données.
+ * Champs attendus (attribut name = nom de la colonne) :
+ *   nom, prenom, nom_utilisateur, telephone, mot_de_passe, confirmation_mot_de_passe, photo
+ *   type_parrain, chambre      uniquement pour un parrain
  */
-declare(strict_types=1);
 
-require __DIR__ . '/config/db.php';   // doit définir $pdo (connexion PDO)
+/** Lettres (accents compris), espaces, apostrophes, points et tirets. */
+const REGEX_NOM_PERSONNE = "/^\p{L}[\p{L}\p{M} '.-]*$/u";
 
-/* ---------- Réglages ---------- */
-// Page de formulaire à rouvrir après le traitement, selon le profil
-const PAGES_RETOUR     = ['dut1' => 'inscription-dut1.html', 'parrain' => 'inscription-parrain.html'];
-const PAGE_PAR_DEFAUT  = 'accueil-dut1.html';   // si le profil est inconnu
-const DOSSIER_PHOTO = __DIR__ . '/uploads/photos';
-const URL_PHOTO     = 'uploads/photos';        // chemin enregistré en base
-const PHOTO_MAX     = 2 * 1024 * 1024;         // 2 Mo
-const MDP_MIN       = 8;                       // longueur minimale du mot de passe
-const MDP_MAX_OCTETS = 72;                     // limite de bcrypt (au-delà, le mot de passe serait tronqué)
-const TYPES_PARRAIN = ['Parrain', 'Marraine', 'Mame'];
+/** Le DUT1 doit mettre sa photo (les parrains la reconnaissent) ; elle est facultative pour un parrain. */
+const PHOTO_OBLIGATOIRE = ['dut1' => true, 'parrain' => false];
 
-function retour(array $params): void
+/**
+ * Traite le formulaire d'inscription d'un rôle ('dut1' ou 'parrain').
+ * Si tout est bon : crée le compte, puis redirige vers la page de connexion du rôle.
+ * Sinon : renvoie les erreurs par champ (['telephone' => 'Numéro invalide…', …]).
+ */
+function traiter_inscription(PDO $pdo, string $role): array
 {
-    $page = PAGES_RETOUR[$params['role'] ?? ''] ?? PAGE_PAR_DEFAUT;
-    header('Location: ' . $page . '?' . http_build_query($params), true, 303);
-    exit;
+    verifier_csrf();
+    $texte = fn(string $cle): string => is_string($_POST[$cle] ?? null) ? trim($_POST[$cle]) : '';
+
+    $v = [
+        'nom'             => $texte('nom'),
+        'prenom'          => $texte('prenom'),
+        'nom_utilisateur' => normaliser_nom_utilisateur($texte('nom_utilisateur')),
+        'telephone'       => normaliser_telephone($texte('telephone')),
+    ];
+    $mdp = (string) ($_POST['mot_de_passe'] ?? '');
+    $erreurs = [];
+
+    if ($v['nom'] === '' || mb_strlen($v['nom']) > 50 || !preg_match(REGEX_NOM_PERSONNE, $v['nom'])) {
+        $erreurs['nom'] = 'Nom obligatoire : lettres seulement, 50 caractères au plus.';
+    }
+    if ($v['prenom'] === '' || mb_strlen($v['prenom']) > 80 || !preg_match(REGEX_NOM_PERSONNE, $v['prenom'])) {
+        $erreurs['prenom'] = 'Prénom obligatoire : lettres seulement, 80 caractères au plus.';
+    }
+    if (!nom_utilisateur_valide($v['nom_utilisateur'])) {
+        $erreurs['nom_utilisateur'] = 'De 3 à 30 caractères : lettres minuscules, chiffres, « . » ou « _ ».';
+    } elseif (!nom_utilisateur_disponible($pdo, $v['nom_utilisateur'])) {
+        $erreurs['nom_utilisateur'] = 'Ce nom d’utilisateur est déjà utilisé. Choisis-en un autre.';
+    }
+    if ($v['telephone'] === null) {
+        $erreurs['telephone'] = 'Numéro invalide (ex. 77 123 45 67 ou +221 77 123 45 67).';
+    }
+    if (!mot_de_passe_valide($mdp)) {
+        $erreurs['mot_de_passe'] = 'Le mot de passe doit faire au moins 8 caractères.';
+    } elseif (strlen($mdp) > 72) {
+        $erreurs['mot_de_passe'] = '72 caractères au plus.'; // limite de bcrypt : au-delà, le mot de passe serait tronqué
+    }
+    if ($mdp !== (string) ($_POST['confirmation_mot_de_passe'] ?? '')) {
+        $erreurs['confirmation_mot_de_passe'] = 'Les deux mots de passe ne sont pas identiques.';
+    }
+
+    if ($role === 'parrain') {
+        $v['type_parrain'] = $texte('type_parrain');
+        $v['chambre'] = $texte('chambre');
+        if (!in_array($v['type_parrain'], TYPES_PARRAIN, true)) {
+            $erreurs['type_parrain'] = 'Choisis ton type.';
+        }
+        if ($v['chambre'] === '' || mb_strlen($v['chambre']) > 30) {
+            $erreurs['chambre'] = 'La chambre est obligatoire (30 caractères au plus).';
+        }
+    }
+
+    $fichier = $_FILES['photo'] ?? null;
+    if (PHOTO_OBLIGATOIRE[$role] && ($fichier['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        $erreurs['photo'] = 'Choisis une photo de profil.';
+    }
+    if ($erreurs) {
+        return $erreurs;
+    }
+
+    try {
+        $photo = enregistrer_photo($fichier, $role);
+    } catch (RuntimeException $ex) {
+        return ['photo' => $ex->getMessage()];
+    }
+
+    $hash = password_hash($mdp, PASSWORD_DEFAULT);
+    try {
+        if ($role === 'dut1') {
+            $req = $pdo->prepare('INSERT INTO filleul (nom, prenom, nom_utilisateur, telephone, photo, mot_de_passe) VALUES (?, ?, ?, ?, ?, ?)');
+            $req->execute([$v['nom'], $v['prenom'], $v['nom_utilisateur'], $v['telephone'], $photo, $hash]);
+        } else {
+            $req = $pdo->prepare('INSERT INTO parrain (nom, prenom, nom_utilisateur, telephone, type_parrain, chambre, photo, mot_de_passe) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+            $req->execute([$v['nom'], $v['prenom'], $v['nom_utilisateur'], $v['telephone'], $v['type_parrain'], $v['chambre'], $photo, $hash]);
+        }
+    } catch (PDOException $ex) {
+        if ($photo !== null && is_file(__DIR__ . '/../' . $photo)) {
+            unlink(__DIR__ . '/../' . $photo);
+        }
+        // 1062 = doublon : quelqu'un a pris ce nom d'utilisateur entre-temps
+        if ((int) ($ex->errorInfo[1] ?? 0) === 1062) {
+            return ['nom_utilisateur' => 'Ce nom d’utilisateur est déjà utilisé. Choisis-en un autre.'];
+        }
+        throw $ex;
+    }
+
+    flash('succes', 'Compte créé ! Connecte-toi avec ton nom d’utilisateur et ton mot de passe.');
+    rediriger(ROLES[$role]['connexion']);
+    return [];
 }
 
-function texte(string $cle): string
+/** Message d'erreur d'un champ, à placer dans <p class="message-erreur" id="err-…">. */
+function erreur_champ(array $erreurs, string $champ): string
 {
-    $v = $_POST[$cle] ?? '';
-    return is_string($v) ? trim($v) : '';
+    return e($erreurs[$champ] ?? '');
 }
 
-/* ---------- 1) Requête et profil ---------- */
-if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-    retour(['erreur' => 'erreur_serveur']);
+/** Valeur saisie à réafficher après une erreur (jamais pour un mot de passe ni une photo). */
+function valeur_saisie(string $champ): string
+{
+    return e(is_string($_POST[$champ] ?? null) ? $_POST[$champ] : '');
 }
-$role = texte('role');
-if (!in_array($role, ['dut1', 'parrain'], true)) {
-    retour(['erreur' => 'role_invalide']);
-}
-$echec = fn (string $code) => retour(['erreur' => $code, 'role' => $role]);
-
-/* ---------- 2) Champs communs ---------- */
-$nom      = texte('nom');
-$prenom   = texte('prenom');
-$login    = texte('nom_utilisateur');
-$mdp      = is_string($_POST['mot_de_passe'] ?? null) ? $_POST['mot_de_passe'] : '';
-$confirm  = is_string($_POST['confirmation'] ?? null) ? $_POST['confirmation'] : '';
-
-if ($nom === '' || $prenom === '' || $login === '' || $mdp === '' || texte('telephone') === '') {
-    $echec('champ_manquant');
-}
-if (mb_strlen($nom) > 50 || mb_strlen($prenom) > 80
-    || !preg_match("/^\p{L}[\p{L}\p{M} '.-]*$/u", $nom)
-    || !preg_match("/^\p{L}[\p{L}\p{M} '.-]*$/u", $prenom)) {
-    $echec('nom_invalide');
-}
-if (!preg_match('/^[A-Za-z0-9._-]{3,30}$/', $login)) {
-    $echec('nom_utilisateur_invalide');
-}
-
-// Téléphone : format international, ex. +221771234567 (sert au lien WhatsApp)
-$tel = preg_replace('/[\s().-]+/', '', texte('telephone'));
-if (str_starts_with($tel, '00')) {
-    $tel = '+' . substr($tel, 2);
-}
-if (!preg_match('/^\+[1-9][0-9]{7,14}$/', $tel)) {
-    $echec('telephone_invalide');
-}
-
-if (mb_strlen($mdp) < MDP_MIN || strlen($mdp) > MDP_MAX_OCTETS) {
-    $echec('mot_de_passe_invalide');
-}
-if (!hash_equals($mdp, $confirm)) {
-    $echec('mots_de_passe_differents');
-}
-
-/* ---------- 3) Champs propres aux parrains (RG2, RG3) ---------- */
-$type = null;
-$niveau = null;
-if ($role === 'parrain') {
-    $type = texte('type_parrain');
-    if (!in_array($type, TYPES_PARRAIN, true)) {
-        $echec('type_invalide');
-    }
-    $niveau = texte('niveau');
-    if ($niveau === '') {
-        $echec('niveau_manquant');
-    }
-    if (mb_strlen($niveau) > 30 || !preg_match("/^[\p{L}\p{N} .'-]+$/u", $niveau)) {
-        $echec('niveau_invalide');
-    }
-}
-
-/* ---------- 4) Nom d'utilisateur unique dans TOUTES les tables ---------- */
-try {
-    $req = $pdo->prepare(
-        'SELECT 1 FROM filleul WHERE nom_utilisateur = ?
-         UNION ALL SELECT 1 FROM parrain WHERE nom_utilisateur = ?
-         UNION ALL SELECT 1 FROM administrateur WHERE nom_utilisateur = ?
-         LIMIT 1'
-    );
-    $req->execute([$login, $login, $login]);
-    if ($req->fetchColumn() !== false) {
-        $echec('nom_utilisateur_pris');
-    }
-} catch (PDOException $e) {
-    error_log('[inscription] ' . $e->getMessage());
-    $echec('erreur_serveur');
-}
-
-/* ---------- 5) Photo facultative ---------- */
-$cheminPhoto = null;     // chemin enregistré en base
-$fichierPhoto = null;    // fichier sur le disque (pour l'effacer en cas d'échec)
-$f = $_FILES['photo'] ?? null;
-if (is_array($f) && ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
-    if ($f['error'] !== UPLOAD_ERR_OK || $f['size'] > PHOTO_MAX || !is_uploaded_file($f['tmp_name'])) {
-        $echec('photo_invalide');
-    }
-    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($f['tmp_name']);
-    $extensions = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    if (!isset($extensions[$mime]) || @getimagesize($f['tmp_name']) === false) {
-        $echec('photo_invalide');
-    }
-    if (!is_dir(DOSSIER_PHOTO) && !mkdir(DOSSIER_PHOTO, 0755, true)) {
-        error_log('[inscription] impossible de créer ' . DOSSIER_PHOTO);
-        $echec('erreur_serveur');
-    }
-    // Nom aléatoire : on n'utilise jamais le nom envoyé par l'utilisateur
-    $nomFichier = bin2hex(random_bytes(16)) . '.' . $extensions[$mime];
-    $fichierPhoto = DOSSIER_PHOTO . '/' . $nomFichier;
-    if (!move_uploaded_file($f['tmp_name'], $fichierPhoto)) {
-        $echec('erreur_serveur');
-    }
-    $cheminPhoto = URL_PHOTO . '/' . $nomFichier;
-}
-
-/* ---------- 6) Enregistrement ---------- */
-$hash = password_hash($mdp, PASSWORD_DEFAULT);   // bcrypt (RG10)
-
-try {
-    if ($role === 'dut1') {
-        $ins = $pdo->prepare(
-            'INSERT INTO filleul (nom, prenom, nom_utilisateur, telephone, photo, mot_de_passe)
-             VALUES (?, ?, ?, ?, ?, ?)'
-        );
-        $ins->execute([$nom, $prenom, $login, $tel, $cheminPhoto, $hash]);
-    } else {
-        $ins = $pdo->prepare(
-            'INSERT INTO parrain (nom, prenom, nom_utilisateur, telephone, type_parrain, niveau, photo, mot_de_passe)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-        );
-        $ins->execute([$nom, $prenom, $login, $tel, $type, $niveau, $cheminPhoto, $hash]);
-    }
-} catch (PDOException $e) {
-    if ($fichierPhoto !== null && is_file($fichierPhoto)) {
-        unlink($fichierPhoto);
-    }
-    // 1062 = doublon : quelqu'un a pris ce nom d'utilisateur entre-temps
-    if ((int) ($e->errorInfo[1] ?? 0) === 1062 || $e->getCode() === '23000') {
-        $echec('nom_utilisateur_pris');
-    }
-    error_log('[inscription] ' . $e->getMessage());
-    $echec('erreur_serveur');
-}
-
-retour(['succes' => 1, 'role' => $role]);

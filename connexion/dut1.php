@@ -1,3 +1,18 @@
+<?php
+require_once __DIR__ . '/../includes/init.php';
+require_once __DIR__ . '/fonctions_connexion.php';
+
+// Déjà connecté : direction la page d'accueil de son rôle
+if ($u = utilisateur()) {
+    rediriger(ROLES[$u['role']]['accueil']);
+}
+
+$erreur = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $erreur = traiter_connexion($pdo, 'dut1');
+}
+$messages = lire_flash();
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="connexion.css">
+<link rel="stylesheet" href="<?= e(url('assets/css/connexion.css')) ?>">
 </head>
 <body data-role="dut1">
 
@@ -15,8 +30,8 @@
   <svg class="logo" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
     <circle cx="24" cy="24" r="21"/><path d="M15 33l3-9 14-14 6 6-14 14-9 3z" stroke-linejoin="round"/><path d="M29 13l6 6"/>
   </svg>
-  <a class="brand" href="accueil-dut1.html">SITE SIGNATURE <span>2027</span></a>
-  <a class="home" href="accueil-dut1.html">Accueil</a>
+  <a class="brand" href="<?= e(url('espace/dut1.php')) ?>">SITE SIGNATURE <span>2027</span></a>
+  <a class="home" href="<?= e(url('espace/dut1.php')) ?>">Accueil</a>
 </header>
 
 <section class="hero">
@@ -32,17 +47,24 @@
     <h2>Connexion DUT1</h2>
     <p class="sub">Entre ton nom d'utilisateur et ton mot de passe.</p>
 
-    <form id="form" novalidate>
-      <label for="user">Nom d'utilisateur</label>
-      <input id="user" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <?php foreach ($messages as $m): ?>
+      <p class="msg<?= $m['type'] === 'erreur' ? '' : ' ok' ?>"><?= e($m['message']) ?></p>
+    <?php endforeach; ?>
 
-      <label for="pass">Mot de passe</label>
+    <form id="form" method="post" novalidate>
+      <?= champ_csrf() ?>
+      <label for="nom_utilisateur">Nom d'utilisateur</label>
+      <input id="nom_utilisateur" name="nom_utilisateur" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="30"
+             value="<?= e($_POST['nom_utilisateur'] ?? '') ?>" aria-invalid="<?= $erreur ? 'true' : 'false' ?>">
+
+      <label for="mot_de_passe">Mot de passe</label>
       <div class="field">
-        <input id="pass" name="password" type="password" autocomplete="current-password" required style="padding-right:76px">
+        <input id="mot_de_passe" name="mot_de_passe" type="password" autocomplete="current-password" required class="champ-avec-oeil"
+               aria-invalid="<?= $erreur ? 'true' : 'false' ?>">
         <button type="button" class="eye" id="eye" aria-label="Afficher le mot de passe" aria-pressed="false">Afficher</button>
       </div>
 
-      <p class="msg" id="msg" role="alert" aria-live="polite"></p>
+      <p class="msg" id="msg" role="alert" aria-live="polite"><?= e($erreur) ?></p>
 
       <button class="btn" id="go" type="submit">
         <span class="spin" aria-hidden="true"></span>
@@ -51,6 +73,7 @@
       </button>
     </form>
 
+    <p class="links">Pas encore de compte ? <a href="<?= e(url('inscription/dut1.php')) ?>">Créer un compte</a></p>
   </div>
 </main>
 
@@ -60,6 +83,6 @@
   <small>ESP Dakar &nbsp;|&nbsp; SITE SIGNATURE 2027</small>
 </footer>
 
-<script src="connexion-dut1.js"></script>
+<script src="<?= e(url('assets/js/connexion.js')) ?>"></script>
 </body>
 </html>

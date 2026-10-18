@@ -1,3 +1,17 @@
+<?php
+require_once __DIR__ . '/../includes/init.php';
+require_once __DIR__ . '/fonctions_inscription.php';
+
+// Déjà connecté : direction la page d'accueil de son rôle
+if ($u = utilisateur()) {
+    rediriger(ROLES[$u['role']]['accueil']);
+}
+
+$erreurs = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $erreurs = traiter_inscription($pdo, 'parrain');
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,8 +23,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- Feuille de style : inscription.css (même dossier que cette page) -->
-<link rel="stylesheet" href="inscription.css">
+<link rel="stylesheet" href="<?= e(url('assets/css/inscription.css')) ?>">
 </head>
 
 <body class="page-inscription">
@@ -29,12 +42,12 @@
 <!-- ============ EN-TETE ============ -->
 <header class="ins-top" id="top">
   <div class="ins-wrap">
-    <a class="ins-brand" href="connexion-parrain.html" aria-label="Site Signature 2027 - accueil">
+    <a class="ins-brand" href="<?= e(url('espace/parrain.php')) ?>" aria-label="Site Signature 2027 - accueil">
       <svg class="ins-logo" aria-hidden="true"><use href="#logo"/></svg>
       <b>SITE SIGNATURE <span>2027</span></b>
     </a>
     <nav class="ins-nav" aria-label="Navigation principale">
-      <a class="ins-home" href="connexion-parrain.html">
+      <a class="ins-home" href="<?= e(url('espace/parrain.php')) ?>">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3L12 3z"/></svg>Accueil
       </a>
     </nav>
@@ -90,59 +103,56 @@
       <h2>Formulaire parrain, marraine ou Mame</h2>
       <p class="intro">Crée ton compte pour signer pour les DUT1. Les champs marqués d'une étoile sont obligatoires.</p>
 
-      <form id="form-inscription" method="post" action="inscription.php"
-              enctype="multipart/form-data" novalidate data-connexion="connection-parrain.html">
+      <form id="form-inscription" method="post" enctype="multipart/form-data" novalidate>
+          <?= champ_csrf() ?>
 
           <div class="grille">
 
             <div class="champ">
               <label for="nom">Nom <span class="etoile">*</span></label>
-              <input type="text" id="nom" name="nom" required data-regle="texte" data-max="50"
+              <input type="text" id="nom" name="nom" value="<?= valeur_saisie('nom') ?>" required data-regle="texte" data-max="50"
                      placeholder="Entre ton nom" autocomplete="family-name" aria-describedby="err-nom">
-              <p class="message-erreur" id="err-nom" aria-live="polite"></p>
+              <p class="message-erreur" id="err-nom" aria-live="polite"><?= erreur_champ($erreurs, 'nom') ?></p>
             </div>
 
             <div class="champ">
               <label for="prenom">Prénom <span class="etoile">*</span></label>
-              <input type="text" id="prenom" name="prenom" required data-regle="texte" data-max="80"
+              <input type="text" id="prenom" name="prenom" value="<?= valeur_saisie('prenom') ?>" required data-regle="texte" data-max="80"
                      placeholder="Entre ton prénom" autocomplete="given-name" aria-describedby="err-prenom">
-              <p class="message-erreur" id="err-prenom" aria-live="polite"></p>
+              <p class="message-erreur" id="err-prenom" aria-live="polite"><?= erreur_champ($erreurs, 'prenom') ?></p>
             </div>
 
             <div class="champ">
               <label for="type_parrain">Tu es <span class="etoile">*</span></label>
               <select id="type_parrain" name="type_parrain" required data-regle="liste" aria-describedby="err-type_parrain">
                 <option value="">Choisis ton type</option>
-                <option value="Parrain">Parrain</option>
-                <option value="Marraine">Marraine</option>
-                <option value="Mame 1">Mame 1</option>
-                <option value="Mame 1">Mame 2</option>
-                <option value="Mame 1">Mame 3</option>
+                <?php foreach (TYPES_PARRAIN as $t): ?>
+                  <option value="<?= e($t) ?>" <?= valeur_saisie('type_parrain') === e($t) ? 'selected' : '' ?>><?= e($t) ?></option>
+                <?php endforeach; ?>
               </select>
-              <p class="message-erreur" id="err-type_parrain" aria-live="polite"></p>
+              <p class="message-erreur" id="err-type_parrain" aria-live="polite"><?= erreur_champ($erreurs, 'type_parrain') ?></p>
             </div>
 
-           
 
             <div class="champ">
               <label for="chambre">Chambre <span class="etoile">*</span></label>
-              <input type="text" id="chambre" name="chambre" required data-regle="texte" data-max="20"
+              <input type="text" id="chambre" name="chambre" value="<?= valeur_saisie('chambre') ?>" required data-regle="texte" data-max="30"
                      placeholder="Numéro de ta chambre" aria-describedby="err-chambre">
-              <p class="message-erreur" id="err-chambre" aria-live="polite"></p>
+              <p class="message-erreur" id="err-chambre" aria-live="polite"><?= erreur_champ($erreurs, 'chambre') ?></p>
             </div>
 
             <div class="champ">
               <label for="telephone">Téléphone <span class="etoile">*</span></label>
-              <input type="tel" id="telephone" name="telephone" required data-regle="telephone"
-                     placeholder="+221 77 123 45 67" autocomplete="tel" aria-describedby="err-telephone">
-              <p class="message-erreur" id="err-telephone" aria-live="polite"></p>
+              <input type="tel" id="telephone" name="telephone" value="<?= valeur_saisie('telephone') ?>" required data-regle="telephone"
+                     placeholder="77 123 45 67" autocomplete="tel" aria-describedby="err-telephone">
+              <p class="message-erreur" id="err-telephone" aria-live="polite"><?= erreur_champ($erreurs, 'telephone') ?></p>
             </div>
 
             <div class="champ plein">
               <label for="nom_utilisateur">Nom d'utilisateur <span class="etoile">*</span></label>
-              <input type="text" id="nom_utilisateur" name="nom_utilisateur" required data-regle="utilisateur" data-max="30"
+              <input type="text" id="nom_utilisateur" name="nom_utilisateur" value="<?= valeur_saisie('nom_utilisateur') ?>" required data-regle="utilisateur" data-max="30"
                      placeholder="Choisis un nom d'utilisateur" autocomplete="username" aria-describedby="err-nom_utilisateur">
-              <p class="message-erreur" id="err-nom_utilisateur" aria-live="polite"></p>
+              <p class="message-erreur" id="err-nom_utilisateur" aria-live="polite"><?= erreur_champ($erreurs, 'nom_utilisateur') ?></p>
             </div>
 
             <div class="champ">
@@ -154,7 +164,7 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
                 </button>
               </div>
-              <p class="message-erreur" id="err-mot_de_passe" aria-live="polite"></p>
+              <p class="message-erreur" id="err-mot_de_passe" aria-live="polite"><?= erreur_champ($erreurs, 'mot_de_passe') ?></p>
             </div>
 
             <div class="champ">
@@ -166,7 +176,7 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
                 </button>
               </div>
-              <p class="message-erreur" id="err-confirmation_mot_de_passe" aria-live="polite"></p>
+              <p class="message-erreur" id="err-confirmation_mot_de_passe" aria-live="polite"><?= erreur_champ($erreurs, 'confirmation_mot_de_passe') ?></p>
             </div>
 
             <div class="champ plein">
@@ -178,21 +188,21 @@
                 <div>
                   <label class="btn-photo">
                     Choisir une photo
-                    <input type="file" id="photo" name="photo" accept="image/jpeg,image/png" data-regle="photo" aria-describedby="err-photo">
+                    <input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/webp" data-regle="photo" aria-describedby="err-photo">
                   </label>
-                  <p class="aide-photo">Format JPG ou PNG, 2 Mo maximum.</p>
+                  <p class="aide-photo">Format JPG, PNG ou WebP, 2 Mo maximum.</p>
                 </div>
               </div>
-              <p class="message-erreur" id="err-photo" aria-live="polite"></p>
+              <p class="message-erreur" id="err-photo" aria-live="polite"><?= erreur_champ($erreurs, 'photo') ?></p>
             </div>
 
           </div>
 
           <button type="submit" class="btn">Créer mon compte</button>
-          <div class="alerte" id="alerte" role="status"></div>
+          <div class="alerte<?= $erreurs ? ' echec visible' : '' ?>" id="alerte" role="status"><?= $erreurs ? 'Certains champs sont à corriger avant de continuer.' : '' ?></div>
         </form>
 
-      <p class="lien-bas">Tu as déjà un compte ? <a href="connexion-parrain.html">Se connecter</a></p>
+      <p class="lien-bas">Tu as déjà un compte ? <a href="<?= e(url('connexion/parrain.php')) ?>">Se connecter</a></p>
     </div>
   </div>
 
@@ -217,6 +227,6 @@
   </div>
 </footer>
 
-<script src="inscription.js"></script>
+<script src="<?= e(url('assets/js/inscription.js')) ?>"></script>
 </body>
 </html>

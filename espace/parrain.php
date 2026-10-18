@@ -1,3 +1,12 @@
+<?php
+// Équipes 1-2 : page d'accueil publique de l'espace parrains, marraines et Mames (créer un compte ou se connecter).
+require_once __DIR__ . '/../includes/init.php';
+
+// Déjà connecté : direction la page d'accueil de son rôle
+if ($u = utilisateur()) {
+    rediriger(ROLES[$u['role']]['accueil']);
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,12 +15,11 @@
 <meta name="theme-color" content="#052a63">
 <title>Espace parrain, marraine et Mame - Site Signature 2027 - ESP Dakar</title>
 <meta name="description" content="Espace parrain, marraine et Mame : scanne le code QR de tes filleuls et signe pour eux.">
-<script>document.documentElement.classList.add('js')</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="accueil.css">
+<link rel="stylesheet" href="<?= e(url('assets/css/accueil.css')) ?>">
 </head>
 
 <body data-role="parrain">
@@ -45,9 +53,9 @@
   </div>
   <div class="menu" id="menu" hidden>
     <a href="#top">Accueil</a>
-    <a id="mSignup" href="inscription-parrain.html">Créer un compte<small>Nouveau parrain, marraine ou Mame</small></a>
-    <a id="mLogin" href="connexion-parrain.html">Se connecter<small>Scanner et signer</small></a>
-    
+    <a id="mSignup" href="<?= e(url('inscription/parrain.php')) ?>">Créer un compte<small>Nouveau parrain, marraine ou Mame</small></a>
+    <a id="mLogin" href="<?= e(url('connexion/parrain.php')) ?>">Se connecter<small>Scanner et signer</small></a>
+
   </div>
 </header>
 
@@ -70,11 +78,11 @@
 <!-- ============ BOUTONS ============ -->
 <div class="cta-wrap">
   <div class="cta-row">
-    <a class="cta signup" id="goSignup" href="inscription-parrain.html">
+    <a class="cta signup" id="goSignup" href="<?= e(url('inscription/parrain.php')) ?>">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3.2-6 7-6s7 2 7 6M19 8v6M16 11h6"/></svg>
       Créer un compte
     </a>
-    <a class="cta" id="goLogin" href="connexion-parrain.html">
+    <a class="cta" id="goLogin" href="<?= e(url('connexion/parrain.php')) ?>">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M3 12h12M10 7l5 5-5 5"/></svg>
       Se connecter
     </a>
@@ -113,7 +121,6 @@
   </div>
 </footer>
 
-
-<script src="accueil.js"></script>
+<script src="<?= e(url('assets/js/accueil.js')) ?>"></script>
 </body>
 </html>

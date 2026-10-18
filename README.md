@@ -16,7 +16,7 @@ Stack : HTML, CSS, JavaScript, PHP, MySQL.
 
 | Fichier | Rôle | Équipe |
 |---|---|---|
-| `index.php` | Page d'entrée (liens inscription / connexion) | Commun |
+| `index.php` | Page d'entrée (choix DUT1 / parrain) | Commun |
 | `config/db.example.php` | Modèle de configuration (base, `BASE_URL`) | Commun |
 | `includes/init.php` | Démarrage de chaque page : session, `$pdo`, fonctions | Commun |
 | `includes/fonctions.php` | Échappement, redirection, messages, CSRF, validations, photos | Commun |
@@ -25,11 +25,17 @@ Stack : HTML, CSS, JavaScript, PHP, MySQL.
 | `includes/header.php`, `includes/footer.php` | En-tête et pied de page | Commun |
 | `assets/css/style.css`, `assets/js/main.js` | Style et script communs | Commun |
 | `sql/signature2027.sql` | Création de la base | Commun |
+| `espace/dut1.php`, `espace/parrain.php` | Accueil public de chaque espace (boutons « Créer un compte » / « Se connecter ») | **Équipes 1-2** |
+| `assets/css/accueil.css`, `assets/js/accueil.js`, `assets/img/esp.jpg` | Style, menu et photo des pages `espace/` | **Équipes 1-2** |
 | `inscription/dut1.php` | Inscription DUT1 | **Équipe 1** |
 | `inscription/parrain.php` | Inscription parrains, marraines, Mames | **Équipe 1** |
+| `inscription/fonctions_inscription.php` | Traitement commun aux deux inscriptions (validation, photo, enregistrement) | **Équipe 1** |
+| `assets/css/inscription.css`, `assets/js/inscription.js` | Style et vérification en direct des formulaires d'inscription | **Équipe 1** |
 | `connexion/dut1.php` | Connexion DUT1 | **Équipe 2** |
 | `connexion/parrain.php` | Connexion parrains, marraines, Mames | **Équipe 2** |
-| `connexion/deconnexion.php` | Déconnexion | **Équipe 2** |
+| `connexion/fonctions_connexion.php` | Traitement commun aux deux connexions (limite de tentatives) | **Équipe 2** |
+| `assets/css/connexion.css`, `assets/js/connexion.js` | Style et script des pages de connexion | **Équipe 2** |
+| `connexion/deconnexion.php` | Déconnexion (tous les rôles) | **Équipe 2** |
 | `dut1/accueil.php` | Accueil DUT1 : compteur, bouton « Signer », QR code, checklist | **Équipe 3** |
 | `dut1/signer.php` | Box de signature (sur le téléphone du DUT1) + messages | **Équipe 3** |
 | `dut1/registre.php` | Registre des parrains avec leur chambre | **Équipe 3** |
