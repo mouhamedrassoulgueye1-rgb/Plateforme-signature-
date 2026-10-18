@@ -62,6 +62,11 @@ require __DIR__ . '/../includes/header.php';
 
 Règle : le traitement PHP en haut, le HTML en bas. Après un POST réussi, toujours `rediriger()` (pas de double envoi en actualisant).
 
+Pages publiques avec leur propre maquette (`espace/`, `connexion/`, `inscription/`) : elles n'incluent pas
+`header.php` / `footer.php`, mais commencent quand même par `init.php`, écrivent tous leurs liens avec `url()`
+et affichent les messages avec `lire_flash()`. Leur CSS est dans un fichier à part (`assets/css/connexion.css`…),
+jamais chargé par les autres pages. Aucune page ne doit ouvrir sa propre connexion PDO ou redéfinir une fonction commune.
+
 ## 4. Conventions de nommage
 
 | Élément | Convention | Exemple |
@@ -93,7 +98,7 @@ Ces fonctions sont communes : on les appelle, on ne les réécrit pas. Pour en c
 | `enregistrer_signature()` (renvoie `ok`, `deja_signe`, `introuvable` ou `suspendu`) + `MESSAGES_SIGNATURE` | `includes/signatures.php` | Équipe 3 (box), Équipe 4 (QR code), Équipe 6 (ajout manuel) |
 | `nb_signatures_filleul()`, `rang_filleul()`, `nb_filleuls_actifs()`, `signataires_du_filleul()` | `includes/signatures.php` | Équipes 3 et 5 |
 | `nb_signatures_parrain()`, `filleuls_signes_par()` | `includes/signatures.php` | Équipe 4 |
-| `e()`, `url()`, `rediriger()`, `flash()`, CSRF, validations, `enregistrer_photo()` | `includes/fonctions.php` | Tout le monde |
+| `e()`, `url()`, `rediriger()`, `flash()`, `lire_flash()`, CSRF, validations, `enregistrer_photo()` | `includes/fonctions.php` | Tout le monde |
 
 Après une connexion réussie, on arrive sur : DUT1 → `dut1/accueil.php`, parrain → `parrain/accueil.php`, admin → `admin/index.php` (constante `ROLES`).
 

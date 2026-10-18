@@ -7,8 +7,8 @@
   --bg:#f6faff; --tx:#1b2b45; --mut:#4f6283;
   --font:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
 
-  /* Photo de l'ESP : remplace cette ligne par  url('esp.webp')  si tu as le fichier original */
-  --photo:url('esp.jpg');
+  /* Photo de l'ESP : remplace cette ligne par  url('../img/esp.webp')  si tu as le fichier original */
+  --photo:url('../img/esp.jpg');
 }
 
 /* =====================================================

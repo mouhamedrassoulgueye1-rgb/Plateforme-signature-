@@ -39,14 +39,24 @@ function flash(string $type, string $message): void
     $_SESSION['flash'][] = ['type' => $type, 'message' => $message];
 }
 
+/**
+ * Renvoie les messages en attente puis les efface : [['type' => 'succes', 'message' => '…'], …].
+ * Pour une page qui a sa propre mise en page (sans includes/header.php) et affiche les messages à sa façon.
+ */
+function lire_flash(): array
+{
+    $messages = $_SESSION['flash'] ?? [];
+    unset($_SESSION['flash']);
+    return $messages;
+}
+
 /** Rend les messages en attente (appelé par includes/header.php) puis les efface. */
 function afficher_flash(): string
 {
     $html = '';
-    foreach ($_SESSION['flash'] ?? [] as $f) {
+    foreach (lire_flash() as $f) {
         $html .= '<div class="alerte alerte-' . e($f['type']) . '">' . e($f['message']) . '</div>';
     }
-    unset($_SESSION['flash']);
     return $html;
 }
 

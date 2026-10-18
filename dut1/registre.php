@@ -1,26 +1,11 @@
 <?php
-/** Registre : liste complète + checklist automatique + filtres pavillon › étage › chambre. */
+require_once __DIR__ . '/../includes/init.php';
+$moi = exiger_role('dut1');
+
+/** Équipe 3 : registre des signataires avec leur chambre, checklist automatique (« a signé ») et filtres. */
 
 // =============================================================================
-// 1. CONFIGURATION
-// =============================================================================
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-$pdo = new PDO(
-    'mysql:host=localhost;dbname=signature2027;charset=utf8mb4',
-    'root',          // ← à adapter
-    '',              // ← à adapter
-    [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
-    ]
-);
-
-// =============================================================================
-// 2. CHAMBRES
+// 1. CHAMBRES
 // =============================================================================
 const PAVILLONS = ['A', 'B', 'C', 'G'];
 
@@ -119,123 +104,86 @@ function construire_arbre(array &$registre): array
 }
 
 // =============================================================================
-// 3. UTILITAIRES
+// 2. DONNÉES
 // =============================================================================
-function e(?string $s): string
-{
-    return htmlspecialchars((string) $s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-}
+// La version précédente rendait le HTML avec des gabarits lus dans dut1/equipe3.html et un script
+// equipe3.js, qui n'ont jamais été envoyés sur GitHub : la page restait vide. En attendant leur
+// version finale, l'Équipe 3 dispose ici d'un affichage simple au format commun (header.php / footer.php),
+// avec les filtres en GET (pavillon, « pas encore signé »).
 
-/** Seul un DUT1 connecté passe. Retourne son id_filleul. */
-function exiger_filleul(): int
-{
-    if (($_SESSION['role'] ?? '') !== 'filleul' || empty($_SESSION['id'])) {
-        header('Location: connexion_dut1.php');   // page de l'équipe 2
-        exit;
-    }
-    return (int) $_SESSION['id'];
-}
-
-/** Avatar d'un parrain : sa photo (colonne « photo ») sinon ses initiales. */
-function avatar_html(array $r): string
-{
-    if (!empty($r['photo'])) {
-        return vue('avatar_photo', ['src' => $r['photo']]);
-    }
-    return vue('avatar_initiales', [
-        'initiales' => mb_strtoupper(mb_substr($r['prenom'], 0, 1) . mb_substr($r['nom'], 0, 1)),
-    ]);
-}
-
-// =============================================================================
-// 4. GABARITS
-// =============================================================================
-// Le HTML vit dans equipe3.html. {{nom}} = valeur échappée, {{html_xxx}} = insérée telle quelle.
-function gabarits(): array
-{
-    static $liste = null;
-    if ($liste === null) {
-        $liste = [];
-        $source = file_get_contents(__DIR__ . '/equipe3.html');
-        preg_match_all('/<!--\s*@gabarit\s+(\w+)\s*-->(.*?)<!--\s*@fin\s*-->/s', $source, $m, PREG_SET_ORDER);
-        foreach ($m as $g) {
-            $liste[$g[1]] = trim($g[2], "\r\n");
-        }
-    }
-    return $liste;
-}
-
-function vue(string $nom, array $variables = []): string
-{
-    $html = gabarits()[$nom] ?? '';
-    return preg_replace_callback('/\{\{(\w+)\}\}/', function (array $m) use ($variables): string {
-        $valeur = (string) ($variables[$m[1]] ?? '');
-        return strncmp($m[1], 'html_', 5) === 0 ? $valeur : e($valeur);
-    }, $html);
-}
-
-function page(string $titre, string $contenu, array $scripts = [], string $classeBody = ''): string
-{
-    $balises = '';
-    foreach ($scripts as $src) {
-        $balises .= vue('script', ['src' => $src]);
-    }
-    return vue('layout', [
-        'titre' => $titre, 'classe_body' => $classeBody,
-        'html_contenu' => $contenu, 'html_scripts' => $balises,
-    ]);
-}
-
-// =============================================================================
-// 5. PAGE
-// =============================================================================
-
-$idFilleul = exiger_filleul();
-
-$st = $pdo->prepare(
+$req = $pdo->prepare(
     'SELECT p.prenom, p.nom, p.type_parrain, p.chambre, p.photo, (s.id_parrain IS NOT NULL) AS a_signe
      FROM parrain p
      LEFT JOIN signature s ON s.id_parrain = p.id_parrain AND s.id_filleul = ?
      WHERE p.statut_compte = \'actif\'
      ORDER BY p.nom, p.prenom'
 );
-$st->execute([$idFilleul]);
-$registre = $st->fetchAll();
+$req->execute([$moi['id']]);
+$registre = $req->fetchAll();
 $arbre = construire_arbre($registre);
 
-$lignes = '';
-foreach ($registre as $r) {
-    $i = $r['info'];
-    $lignes .= vue('ligne', [
-        'classe'      => $r['a_signe'] ? 'fait' : '',
-        'pav'         => $i['pavillon'],
-        'etage'       => $i['etage'],
-        'chambre_num' => $i['chambre'] ?? '',
-        'signe'       => $r['a_signe'] ? '1' : '0',
-        'etat'        => $r['a_signe'] ? 'A signé : ' : 'Pas encore signé : ',
-        'html_avatar' => avatar_html($r),
-        'nom'         => $r['prenom'] . ' ' . $r['nom'],
-        'type'        => $r['type_parrain'],
-        'chambre'     => $i['affiche'],
-    ]);
+$pavillon = (string) ($_GET['pavillon'] ?? '');
+if (!isset($arbre[$pavillon])) {
+    $pavillon = '';
 }
+$non_signes = !empty($_GET['non_signes']);
 
-$options = '';
-foreach (array_keys($arbre) as $pav) {
-    $options .= vue('option', [
-        'valeur'  => $pav,
-        'libelle' => $pav === '?' ? 'Chambre non reconnue' : 'Pavillon ' . $pav,
-    ]);
-}
+$nb_signes = count(array_filter($registre, fn($r) => (bool) $r['a_signe']));
+$lignes = array_filter($registre, fn($r) => ($pavillon === '' || $r['info']['pavillon'] === $pavillon)
+    && (!$non_signes || !$r['a_signe']));
 
-$contenu = vue('registre', [
-    'html_entete'      => vue('entete', ['titre' => 'Registre des parrains et Mames']),
-    'html_options_pav' => $options,
-    'html_lignes'      => $lignes,
-    'html_arbre_json'  => json_encode($arbre, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP),
-    'html_pied'        => vue('pied'),
-    'aucun'            => ETAGE_AUCUN,
-    'non_signes'       => !empty($_GET['non_signes']) ? 'checked' : '',
-]);
+// =============================================================================
+// 3. PAGE
+// =============================================================================
+$titre_page = 'Registre des parrains et Mames';
+require __DIR__ . '/../includes/header.php';
+?>
+<section class="carte">
+    <h1><?= e($titre_page) ?></h1>
+    <p class="petit"><?= e($nb_signes) ?> signature(s) sur <?= e(count($registre)) ?> signataires inscrits.</p>
 
-echo page('Registre', $contenu, ['equipe3.js']);
+    <form class="registre-filtres" method="get">
+        <div class="champ">
+            <label for="pavillon">Pavillon</label>
+            <select id="pavillon" name="pavillon">
+                <option value="">Tous les pavillons</option>
+                <?php foreach (array_keys($arbre) as $pav): ?>
+                    <option value="<?= e($pav) ?>" <?= $pav === $pavillon ? 'selected' : '' ?>>
+                        <?= e($pav === '?' ? 'Chambre non reconnue' : 'Pavillon ' . $pav) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <label class="registre-case"><input type="checkbox" name="non_signes" value="1" <?= $non_signes ? 'checked' : '' ?>> Pas encore signé seulement</label>
+        <button class="btn">Filtrer</button>
+    </form>
+</section>
+
+<?php if (!$lignes): ?>
+    <p class="carte petit">Aucun signataire ne correspond.</p>
+<?php else: ?>
+    <div class="carte registre-defilant">
+        <table class="tableau">
+            <thead><tr><th></th><th>Nom</th><th>Type</th><th>Chambre</th><th>Étage</th><th>A signé</th></tr></thead>
+            <tbody>
+            <?php foreach ($lignes as $r): $i = $r['info']; ?>
+                <tr class="<?= $r['a_signe'] ? 'registre-fait' : '' ?>">
+                    <td>
+                        <?php if (!empty($r['photo'])): ?>
+                            <img class="avatar" src="<?= e(url($r['photo'])) ?>" alt="">
+                        <?php else: ?>
+                            <span class="avatar registre-initiales"><?= e(mb_strtoupper(mb_substr($r['prenom'], 0, 1) . mb_substr($r['nom'], 0, 1))) ?></span>
+                        <?php endif; ?>
+                    </td>
+                    <td><?= e($r['prenom'] . ' ' . $r['nom']) ?></td>
+                    <td><?= e($r['type_parrain']) ?></td>
+                    <td><?= e($i['affiche']) ?></td>
+                    <td><?= e($i['etage'] === ETAGE_AUCUN ? '' : $i['etage']) ?></td>
+                    <td><?= $r['a_signe'] ? '✔ Oui' : 'Pas encore' ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+<?php endif; ?>
+<?php require __DIR__ . '/../includes/footer.php'; ?>
