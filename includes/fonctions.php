@@ -1,14 +1,22 @@
 <?php
 /**
  * Fonctions communes. Ne pas les dupliquer dans les pages : si une fonction manque,
- * proposez-la ici par une pull request (fichier Commun).
+ * propose-la ici par une pull request (fichier Commun).
  */
 
 /** Valeurs autorisées pour parrain.type_parrain (identiques à l'ENUM de la base). */
 const TYPES_PARRAIN = ['Parrain', 'Marraine', 'Mame1', 'Mame2', 'Mame3', 'Alumni'];
 
+/** Libellés par défaut des types, si l'admin n'en a pas défini d'autres (table libelle_type, page admin/libelles.php). */
+const LIBELLES_TYPE_DEFAUT = [
+    'Parrain' => 'Parrain', 'Marraine' => 'Marraine', 'Mame1' => 'Mame 1', 'Mame2' => 'Mame 2', 'Mame3' => 'Mame 3', 'Alumni' => 'Alumni',
+];
+
 /** Taille maximale d'une photo de profil : 2 Mo. */
 const PHOTO_TAILLE_MAX = 2 * 1024 * 1024;
+
+/** Photo obligatoire selon le rôle : le DUT1 doit en avoir une (les parrains le reconnaissent), le parrain non. */
+const PHOTO_OBLIGATOIRE = ['dut1' => true, 'parrain' => false];
 
 // ---------------------------------------------------------------------------------------------
 // Affichage et navigation
@@ -81,9 +89,11 @@ function champ_csrf(): string
 /** À appeler au début du traitement de chaque formulaire POST. */
 function verifier_csrf(): void
 {
-    if (!hash_equals($_SESSION['csrf'] ?? '', (string) ($_POST['csrf'] ?? ''))) {
+    $jeton = (string) ($_SESSION['csrf'] ?? '');
+    // Jeton absent de la session = formulaire jamais affiché : refusé (sinon '' === '' passerait)
+    if ($jeton === '' || !hash_equals($jeton, (string) ($_POST['csrf'] ?? ''))) {
         http_response_code(400);
-        exit('Formulaire expiré. Rechargez la page et réessayez.');
+        exit('Formulaire expiré. Recharge la page et réessaie.');
     }
 }
 
@@ -133,6 +143,33 @@ function normaliser_telephone(string $tel): ?string
         $chiffres = '221' . $chiffres; // numéro sénégalais saisi sans indicatif
     }
     return preg_match('/^\d{11,15}$/', $chiffres) ? $chiffres : null;
+}
+
+/**
+ * Libellés affichés des types de parrain, réglés par l'admin : ['Mame1' => 'Mame 1', …].
+ * La valeur enregistrée en base ne change jamais (ENUM) ; seul le texte affiché change.
+ */
+function libelles_types(): array
+{
+    global $pdo;
+    static $libelles = null;
+    if ($libelles === null) {
+        $libelles = LIBELLES_TYPE_DEFAUT;
+        try {
+            foreach ($pdo->query('SELECT type_parrain, libelle FROM libelle_type')->fetchAll() as $l) {
+                $libelles[$l['type_parrain']] = $l['libelle'];
+            }
+        } catch (PDOException $ex) {
+            // Table pas encore créée (base d'avant sql/signature2027.sql à jour) : libellés par défaut
+        }
+    }
+    return $libelles;
+}
+
+/** Libellé affiché d'un type : libelle_type('Mame1') → « Mame 1 ». */
+function libelle_type(?string $type): string
+{
+    return libelles_types()[$type] ?? (string) $type;
 }
 
 /** Lien WhatsApp à partir d'un téléphone stocké en base. */

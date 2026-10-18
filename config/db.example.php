@@ -1,7 +1,7 @@
 <?php
 // Modèle de configuration.
-// 1. Copiez ce fichier en config/db.php
-// 2. Adaptez les valeurs à votre machine.
+// 1. Copie ce fichier en config/db.php
+// 2. Adapte les valeurs à ta machine.
 // config/db.php n'est jamais envoyé sur GitHub (voir .gitignore) : chacun garde le sien.
 
 define('DB_HOTE', 'localhost');

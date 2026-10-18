@@ -18,6 +18,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Bouton « Afficher » d'un mot de passe : <button type="button" class="oeil" data-cible="id_du_champ">Afficher</button>
+  document.querySelectorAll('.oeil[data-cible]').forEach((bouton) => {
+    const champ = document.getElementById(bouton.dataset.cible);
+    if (!champ) return;
+    bouton.setAttribute('aria-pressed', 'false');
+    bouton.addEventListener('click', () => {
+      const montrer = champ.type === 'password';
+      champ.type = montrer ? 'text' : 'password';
+      bouton.textContent = montrer ? 'Masquer' : 'Afficher';
+      bouton.setAttribute('aria-pressed', String(montrer));
+      bouton.setAttribute('aria-label', (montrer ? 'Masquer' : 'Afficher') + ' le mot de passe');
+    });
+  });
+
   // Les messages de succès disparaissent après 5 secondes
   document.querySelectorAll('.alerte-succes').forEach((el) => setTimeout(() => el.remove(), 5000));
 });

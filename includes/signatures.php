@@ -42,7 +42,7 @@ function enregistrer_signature(PDO $pdo, int $id_parrain, int $id_filleul): stri
 /** Messages à afficher selon le résultat de enregistrer_signature() (mêmes textes partout). */
 const MESSAGES_SIGNATURE = [
     'ok'          => 'Signature enregistrée. Merci !',
-    'deja_signe'  => 'Vous avez déjà signé pour cette personne.',
+    'deja_signe'  => 'Tu as déjà signé pour cette personne.',
     'introuvable' => 'Ce DUT1 est introuvable.',
     'suspendu'    => 'Signature impossible : ce compte est suspendu.',
 ];
@@ -104,4 +104,44 @@ function rang_filleul(PDO $pdo, int $id_filleul): int
 function nb_filleuls_actifs(PDO $pdo): int
 {
     return (int) $pdo->query('SELECT COUNT(*) FROM filleul WHERE statut_compte = \'actif\'')->fetchColumn();
+}
+
+/** Objectif de signatures d'un DUT1 : 100 % de progression (accueil DUT1, Mes signatures, Classement). */
+const OBJECTIF_SIGNATURES = 120;
+
+/**
+ * Classement des DUT1, du plus signé au moins signé (à égalité : ordre alphabétique).
+ * Même règle que rang_filleul() : seuls les comptes actifs sont classés, les ex æquo ont le même rang
+ * (10, 8, 8, 5 signatures → rangs 1, 2, 2, 4).
+ * $avec_suspendus = true (admin) : les comptes suspendus sont ajoutés à la fin, avec 'rang' => null.
+ * Chaque ligne : id_filleul, nom, prenom, nom_utilisateur, telephone, photo, statut_compte, nb_signatures, rang.
+ */
+function classement_filleuls(PDO $pdo, bool $avec_suspendus = false): array
+{
+    $sql = 'SELECT f.id_filleul, f.nom, f.prenom, f.nom_utilisateur, f.telephone, f.photo, f.statut_compte,
+                   COUNT(s.id_parrain) AS nb_signatures
+            FROM filleul f LEFT JOIN signature s ON s.id_filleul = f.id_filleul'
+        . ($avec_suspendus ? '' : ' WHERE f.statut_compte = \'actif\'')
+        . ' GROUP BY f.id_filleul, f.nom, f.prenom, f.nom_utilisateur, f.telephone, f.photo, f.statut_compte
+            ORDER BY (f.statut_compte = \'actif\') DESC, nb_signatures DESC, f.nom, f.prenom';
+    $lignes = $pdo->query($sql)->fetchAll();
+
+    $rang = 0;
+    $precedent = null;
+    $position = 0;
+    foreach ($lignes as &$l) {
+        $l['nb_signatures'] = (int) $l['nb_signatures'];
+        if ($l['statut_compte'] !== 'actif') {
+            $l['rang'] = null;
+            continue;
+        }
+        $position++;
+        if ($l['nb_signatures'] !== $precedent) {
+            $rang = $position;
+            $precedent = $l['nb_signatures'];
+        }
+        $l['rang'] = $rang;
+    }
+    unset($l);
+    return $lignes;
 }
