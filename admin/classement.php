@@ -7,23 +7,8 @@ $q = trim((string) ($_GET['q'] ?? ''));
 $par_page = 25;
 $page = max(1, (int) ($_GET['page'] ?? 1));
 
-// Classement complet : rang calculé en PHP (ex aequo = même rang), puis filtre et pagination
-$lignes = $pdo->query(
-    "SELECT f.id_filleul, f.nom, f.prenom, f.nom_utilisateur, f.telephone, f.statut_compte, COUNT(s.id_parrain) AS nb
-     FROM filleul f LEFT JOIN signature s ON s.id_filleul = f.id_filleul
-     GROUP BY f.id_filleul, f.nom, f.prenom, f.nom_utilisateur, f.telephone, f.statut_compte
-     ORDER BY nb DESC, f.nom, f.prenom"
-)->fetchAll();
-$rang = 0;
-$precedent = null;
-foreach ($lignes as $i => &$l) {
-    if ($l['nb'] !== $precedent) {
-        $rang = $i + 1;
-        $precedent = $l['nb'];
-    }
-    $l['rang'] = $rang;
-}
-unset($l);
+// Classement complet (fonction commune) : rang des comptes actifs, suspendus à la fin sans rang
+$lignes = classement_filleuls($pdo, true);
 if ($q !== '') {
     $lignes = array_values(array_filter($lignes, fn($l) => stripos($l['nom'] . ' ' . $l['prenom'] . ' ' . $l['nom_utilisateur'] . ' ' . $l['telephone'], $q) !== false));
 }
@@ -56,11 +41,11 @@ admin_debut('Classement', 'classement');
             <tbody>
             <?php foreach ($affichees as $l): ?>
                 <tr>
-                    <td><span class="admin-rang <?= $l['rang'] <= 3 ? 'admin-rang-' . $l['rang'] : '' ?>"><?= e($l['rang']) ?></span></td>
+                    <td><span class="admin-rang <?= $l['rang'] !== null && $l['rang'] <= 3 ? 'admin-rang-' . $l['rang'] : '' ?>"><?= e($l['rang'] ?? '–') ?></span></td>
                     <td><?= e($l['nom']) ?></td>
                     <td><?= e($l['prenom']) ?><?= $l['statut_compte'] === 'suspendu' ? ' <span class="admin-badge admin-badge-suspendu">suspendu</span>' : '' ?></td>
                     <td><a href="<?= e(lien_whatsapp($l['telephone'])) ?>" target="_blank" rel="noopener"><?= e($l['telephone']) ?></a></td>
-                    <td><strong><?= e($l['nb']) ?></strong></td>
+                    <td><strong><?= e($l['nb_signatures']) ?></strong></td>
                     <td class="admin-actions">
                         <a href="<?= e(admin_url('utilisateur_voir.php', 'dut1', (int) $l['id_filleul'])) ?>">Voir</a>
                         <a href="<?= e(url('admin/signatures.php?dut1=' . $l['id_filleul'])) ?>">Signatures</a>

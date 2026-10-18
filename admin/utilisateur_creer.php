@@ -16,6 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($e = admin_erreur_mot_de_passe($_POST)) {
         $erreurs['mot_de_passe'] = $e;
     }
+    if (PHOTO_OBLIGATOIRE[$role] && (($_FILES['photo']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE)) {
+        $erreurs['photo'] = 'La photo est obligatoire pour un DUT1 : les parrains doivent pouvoir le reconnaître.';
+    }
     $photo = null;
     if (!$erreurs) {
         try {
@@ -51,7 +54,7 @@ admin_debut($titre_page, 'utilisateurs');
         <?php endforeach; ?>
     </div>
     <?php if ($erreurs): ?>
-        <div class="alerte alerte-erreur">Corrigez les champs signalés.</div>
+        <div class="alerte alerte-erreur">Corrige les champs signalés.</div>
     <?php endif; ?>
     <form class="formulaire" method="post" enctype="multipart/form-data" autocomplete="off">
         <?= champ_csrf() ?>
@@ -67,8 +70,8 @@ admin_debut($titre_page, 'utilisateurs');
         <?= admin_champ('mot_de_passe', 'Mot de passe (8 caractères au moins)', '', $erreurs, 'type="password" required minlength="8"') ?>
         <?= admin_champ('confirmation_mot_de_passe', 'Confirmation du mot de passe', '', $erreurs, 'type="password" required minlength="8"') ?>
         <div class="champ">
-            <label for="photo">Photo (facultative, JPG, PNG ou WebP, 2 Mo au plus)</label>
-            <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp">
+            <label for="photo">Photo <?= PHOTO_OBLIGATOIRE[$role] ? '(obligatoire' : '(facultative' ?>, JPG, PNG ou WebP, 2 Mo au plus)</label>
+            <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" <?= PHOTO_OBLIGATOIRE[$role] ? 'required' : '' ?>>
             <?php if (isset($erreurs['photo'])): ?><span class="admin-erreur-champ"><?= e($erreurs['photo']) ?></span><?php endif; ?>
         </div>
         <button class="btn">Créer le compte</button>

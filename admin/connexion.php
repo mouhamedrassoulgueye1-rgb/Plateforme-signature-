@@ -20,9 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mot_de_passe = (string) ($_POST['mot_de_passe'] ?? '');
 
     if (time() < $bloque_jusqua) {
-        $erreur = 'Trop d’essais. Réessayez dans ' . ceil(($bloque_jusqua - time()) / 60) . ' minute(s).';
+        $erreur = 'Trop d’essais. Réessaie dans ' . ceil(($bloque_jusqua - time()) / 60) . ' minute(s).';
     } elseif ($nom_utilisateur === '' || $mot_de_passe === '') {
-        $erreur = 'Remplissez les deux champs.';
+        $erreur = 'Remplis les deux champs.';
     } else {
         $admin = verifier_identifiants($pdo, 'admin', $nom_utilisateur, $mot_de_passe);
         if ($admin) {
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($_SESSION['admin_essais'] >= ESSAIS_MAX) {
             $_SESSION['admin_bloque_jusqua'] = time() + ATTENTE_SECONDES;
             $_SESSION['admin_essais'] = 0;
-            $erreur = 'Trop d’essais. Réessayez dans 5 minutes.';
+            $erreur = 'Trop d’essais. Réessaie dans 5 minutes.';
         } else {
             $erreur = 'Nom d’utilisateur ou mot de passe incorrect.';
         }
@@ -43,10 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $titre_page = 'Connexion administrateur';
+$bandeau = ['titre' => 'Espace administrateur', 'texte' => 'Accès réservé à l’administration.'];
 require __DIR__ . '/../includes/header.php';
 ?>
-<section class="carte admin-connexion">
-    <h1><?= e($titre_page) ?></h1>
+<section class="carte carte-etroite">
+    <h2>Connecte-toi</h2>
     <?php if ($erreur): ?>
         <div class="alerte alerte-erreur"><?= e($erreur) ?></div>
     <?php endif; ?>
@@ -59,9 +60,12 @@ require __DIR__ . '/../includes/header.php';
         </div>
         <div class="champ">
             <label for="mot_de_passe">Mot de passe</label>
-            <input id="mot_de_passe" name="mot_de_passe" type="password" required>
+            <div class="champ-mdp">
+                <input id="mot_de_passe" name="mot_de_passe" type="password" required>
+                <button type="button" class="oeil" data-cible="mot_de_passe" aria-label="Afficher le mot de passe">Afficher</button>
+            </div>
         </div>
-        <button class="btn">Se connecter</button>
+        <button class="btn btn-large">Se connecter</button>
     </form>
 </section>
 <?php require __DIR__ . '/../includes/footer.php'; ?>

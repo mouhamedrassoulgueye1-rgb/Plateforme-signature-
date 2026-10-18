@@ -80,7 +80,7 @@ admin_debut('Tableau de bord', 'tableau');
                 <?php foreach ($inscriptions as $i): ?>
                     <tr>
                         <td><a href="<?= e(admin_url('utilisateur_voir.php', $i['role'], (int) $i['id'])) ?>"><?= e($i['nom'] . ' ' . $i['prenom']) ?></a></td>
-                        <td><span class="admin-role admin-role-<?= e($i['role']) ?>"><?= e($i['libelle']) ?></span></td>
+                        <td><span class="admin-role admin-role-<?= e($i['role']) ?>"><?= e($i['role'] === 'dut1' ? 'DUT1' : libelle_type($i['libelle'])) ?></span></td>
                         <td><?= e(date('d/m/Y', strtotime($i['date_inscription']))) ?></td>
                     </tr>
                 <?php endforeach; ?>
@@ -102,7 +102,7 @@ admin_debut('Tableau de bord', 'tableau');
                 <tbody>
                 <?php foreach ($dernieres as $s): ?>
                     <tr>
-                        <td><?= e($s['p_nom'] . ' ' . $s['p_prenom']) ?> <span class="petit"><?= e($s['type_parrain']) ?></span></td>
+                        <td><?= e($s['p_nom'] . ' ' . $s['p_prenom']) ?> <span class="petit"><?= e(libelle_type($s['type_parrain'])) ?></span></td>
                         <td><a href="<?= e(url('admin/signatures.php?dut1=' . $s['id_filleul'])) ?>"><?= e($s['f_nom'] . ' ' . $s['f_prenom']) ?></a></td>
                         <td><?= e(date('d/m H:i', strtotime($s['date_signature']))) ?></td>
                     </tr>

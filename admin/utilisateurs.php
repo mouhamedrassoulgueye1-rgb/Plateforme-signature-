@@ -92,7 +92,7 @@ admin_debut($titre_page, 'utilisateurs');
                     <td><?= e($c['prenom'] . ' ' . $c['nom']) ?></td>
                     <td><?= e($c['nom_utilisateur']) ?></td>
                     <td>
-                        <?= e($c['type_parrain'] ?? $libelles_role[$c['role']]) ?>
+                        <?= e($c['type_parrain'] !== null ? libelle_type($c['type_parrain']) : $libelles_role[$c['role']]) ?>
                         <?php if ($c['chambre']): ?><span class="petit">· ch. <?= e($c['chambre']) ?></span><?php endif; ?>
                     </td>
                     <td><a href="<?= e(lien_whatsapp($c['telephone'])) ?>" target="_blank" rel="noopener"><?= e($c['telephone']) ?></a></td>

@@ -69,7 +69,7 @@ function admin_valider_compte(PDO $pdo, string $role, array $post, ?string $actu
         $v['type_parrain'] = (string) ($post['type_parrain'] ?? '');
         $v['chambre'] = trim((string) ($post['chambre'] ?? ''));
         if (!in_array($v['type_parrain'], TYPES_PARRAIN, true)) {
-            $erreurs['type_parrain'] = 'Choisissez un type.';
+            $erreurs['type_parrain'] = 'Choisis un type.';
         }
         if ($v['chambre'] === '' || mb_strlen($v['chambre']) > 30) {
             $erreurs['chambre'] = 'La chambre est obligatoire (30 caractères au plus).';
@@ -119,7 +119,7 @@ function admin_choix_type(string $valeur, array $erreurs): string
     $html = '<div class="champ"><label for="type_parrain">Type</label><select id="type_parrain" name="type_parrain" required>'
         . '<option value="">Choisir…</option>';
     foreach (TYPES_PARRAIN as $t) {
-        $html .= '<option value="' . e($t) . '"' . ($t === $valeur ? ' selected' : '') . '>' . e($t) . '</option>';
+        $html .= '<option value="' . e($t) . '"' . ($t === $valeur ? ' selected' : '') . '>' . e(libelle_type($t)) . '</option>';
     }
     $html .= '</select>';
     if (isset($erreurs['type_parrain'])) {
@@ -148,6 +148,7 @@ function admin_icone(string $nom, int $taille = 20): string
         'valide'          => '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/>',
         'actifs'          => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="m16 11 2 2 4-4"/>',
         'ajouter'         => '<path d="M12 5v14M5 12h14"/>',
+        'libelles'        => '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
     ];
     return '<svg class="admin-icone" width="' . $taille . '" height="' . $taille . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
         . ($traces[$nom] ?? '') . '</svg>';
@@ -160,6 +161,7 @@ const MENU_ADMIN = [
     'signatures'      => ['Signatures', 'admin/signatures.php', 'signatures'],
     'classement'      => ['Classement', 'admin/classement.php', 'classement'],
     'telechargements' => ['Téléchargements', 'admin/telechargements.php', 'telechargements'],
+    'libelles'        => ['Libellés des types', 'admin/libelles.php', 'libelles'],
     'parametres'      => ['Paramètres', 'admin/mot_de_passe.php', 'parametres'],
 ];
 

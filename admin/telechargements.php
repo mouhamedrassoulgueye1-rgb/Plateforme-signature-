@@ -46,23 +46,17 @@ $fichier = (string) ($_GET['fichier'] ?? '');
 if (isset($exports[$fichier])) {
     [$titre, , $entetes, $sql] = $exports[$fichier];
     if ($fichier === 'classement') {
-        $lignes = [];
-        $rang = 0;
-        $precedent = null;
-        $req = $pdo->query(
-            'SELECT f.nom, f.prenom, f.telephone, COUNT(s.id_parrain) AS nb
-             FROM filleul f LEFT JOIN signature s ON s.id_filleul = f.id_filleul
-             GROUP BY f.id_filleul, f.nom, f.prenom, f.telephone ORDER BY nb DESC, f.nom, f.prenom'
-        );
-        foreach ($req->fetchAll() as $i => $l) {
-            if ($l['nb'] !== $precedent) {
-                $rang = $i + 1;
-                $precedent = $l['nb'];
-            }
-            $lignes[] = [$rang, $l['nom'], $l['prenom'], $l['telephone'], $l['nb']];
-        }
+        $lignes = array_map(fn($l) => [$l['rang'] ?? 'suspendu', $l['nom'], $l['prenom'], $l['telephone'], $l['nb_signatures']], classement_filleuls($pdo, true));
     } else {
         $lignes = $pdo->query($sql)->fetchAll(PDO::FETCH_NUM);
+        // Colonne « Type » : libellé réglé dans admin/libelles.php
+        $col_type = ['signataires' => 3, 'signatures' => 2][$fichier] ?? null;
+        if ($col_type !== null) {
+            foreach ($lignes as &$l) {
+                $l[$col_type] = libelle_type($l[$col_type]);
+            }
+            unset($l);
+        }
     }
     header('Content-Type: text/csv; charset=UTF-8');
     header('Content-Disposition: attachment; filename="signature2027_' . $fichier . '_' . date('Y-m-d') . '.csv"');

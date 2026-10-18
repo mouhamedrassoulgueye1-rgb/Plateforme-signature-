@@ -78,7 +78,7 @@ admin_debut($titre_page, 'signatures');
                     <select id="id_parrain" name="id_parrain" required>
                         <option value="">Choisir…</option>
                         <?php foreach ($possibles as $p): ?>
-                            <option value="<?= e($p['id_parrain']) ?>"><?= e($p['nom'] . ' ' . $p['prenom'] . ' · ' . $p['type_parrain'] . ' · ch. ' . $p['chambre']) ?></option>
+                            <option value="<?= e($p['id_parrain']) ?>"><?= e($p['nom'] . ' ' . $p['prenom'] . ' · ' . libelle_type($p['type_parrain']) . ' · ch. ' . $p['chambre']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -99,7 +99,7 @@ admin_debut($titre_page, 'signatures');
                     <?php foreach ($signatures as $s): ?>
                         <tr>
                             <td><a href="<?= e(admin_url('utilisateur_voir.php', 'parrain', (int) $s['id_parrain'])) ?>"><?= e($s['prenom'] . ' ' . $s['nom']) ?></a></td>
-                            <td><?= e($s['type_parrain']) ?></td>
+                            <td><?= e(libelle_type($s['type_parrain'])) ?></td>
                             <td><?= e(date('d/m/Y H:i', strtotime($s['date_signature']))) ?></td>
                             <td>
                                 <form method="post" data-confirmer="Retirer la signature de <?= e($s['prenom'] . ' ' . $s['nom']) ?> ?">
