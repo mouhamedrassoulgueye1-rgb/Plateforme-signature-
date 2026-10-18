@@ -42,6 +42,11 @@ Stack : HTML, CSS, JavaScript, PHP, MySQL.
 | `parrain/telecharger.php` | Téléchargement de la liste | **Équipe 4** |
 | `assets/js/scanner.js` | Lecture du QR code avec la caméra | **Équipe 4** |
 | `dut1/signatures.php` | Liste des signatures DUT1 : WhatsApp, rang, nombre | **Équipe 5** |
+| `dut1/signatures_api.php`, `assets/js/signatures_dut1.js` | API JSON et script de la liste des signatures (actualisation toutes les 30 s) | **Équipe 5** |
+| `dut1/classement.php` | Classement de tous les DUT1, statistiques globales | **Équipe 5** |
+| `dut1/classement_api.php`, `assets/js/classement.js` | API JSON et script du classement (actualisation toutes les 30 s) | **Équipe 5** |
+| `dut1/signatures_fonctions.php` | Données des deux pages et outils de leurs API | **Équipe 5** |
+| `dut1/signatures_api.md`, `dut1/signatures_exemple.json` | Documentation des API et exemple de réponse pour le front | **Équipe 5** |
 | `admin/connexion.php` | Connexion administrateur | **Équipe 6** |
 | `admin/fonctions_admin.php` | Fonctions partagées par les pages admin (lecture du compte visé, validation, champs) | **Équipe 6** |
 | `admin/index.php` | Tableau de bord | **Équipe 6** |
