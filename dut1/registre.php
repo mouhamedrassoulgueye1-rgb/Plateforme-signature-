@@ -1,115 +1,12 @@
 <?php
+/**
+ * DUT1 – Registre des parrains et Mames : liste complète, case « a signé » cochée automatiquement,
+ * filtres pavillon › étage › chambre et « pas encore signé » (formulaire GET, sans JavaScript).
+ * registre.php?non_signes=1 → « Pas encore signé » pré-coché.
+ */
 require_once __DIR__ . '/../includes/init.php';
 $moi = exiger_role('dut1');
-
-/** Équipe 3 : registre des signataires avec leur chambre, checklist automatique (« a signé ») et filtres. */
-
-// =============================================================================
-// 1. CHAMBRES
-// =============================================================================
-const PAVILLONS = ['A', 'B', 'C', 'G'];
-
-const ETAGES = [
-    'A' => [
-        'Rez-de-chaussée' => [1, 5],
-        'Étage 1'         => [6, 28],
-        'Étage 2'         => [29, 51],
-        'Étage 3'         => [52, 75],
-    ],
-    'B' => [
-        'Rez-de-chaussée' => [1, 6],
-        'Étage 1'         => [7, 29],
-        'Étage 2'         => [30, 52],
-        'Étage 3'         => [53, 75],
-    ],
-    'C' => [
-        'Rez-de-chaussée' => [1, 5],
-        'Étage 1'         => [6, 28],
-        'Étage 2'         => [29, 51],
-        'Étage 3'         => [52, 75],
-    ],
-    'G' => [
-        'Étage 1' => [13, 31],
-        'Étage 2' => [32, 50],
-        'Étage 3' => [51, 69],
-        'Étage 4' => [70, 88],
-    ],
-];
-
-const ETAGE_AUCUN   = '_';
-const ETAGE_INCONNU = 'Étage non défini';
-
-/** Transforme la colonne « chambre » ("29G", "G29", "29 g"…) en pavillon / chambre / étage. */
-function analyser_chambre(?string $chambre_brute): array
-{
-    $brut = trim((string) $chambre_brute);
-    $pavillon = null;
-    $chambre  = null;
-
-    if (preg_match('/^(\d{1,3})[\s-]*([A-Za-z])$/u', $brut, $m)) {          // 29G
-        $chambre  = (int) $m[1];
-        $pavillon = strtoupper($m[2]);
-    } elseif (preg_match('/^([A-Za-z])[\s-]*(\d{1,3})$/u', $brut, $m)) {    // G29
-        $chambre  = (int) $m[2];
-        $pavillon = strtoupper($m[1]);
-    }
-
-    if ($pavillon === null || !in_array($pavillon, PAVILLONS, true)) {
-        return ['valide' => false, 'pavillon' => '?', 'chambre' => null,
-                'etage' => ETAGE_AUCUN, 'affiche' => $brut !== '' ? $brut : 'Non renseigné'];
-    }
-
-    $etage = ETAGE_AUCUN;
-    if (!empty(ETAGES[$pavillon])) {
-        $etage = ETAGE_INCONNU;
-        foreach (ETAGES[$pavillon] as $libelle => [$min, $max]) {
-            if ($chambre >= $min && $chambre <= $max) {
-                $etage = $libelle;
-                break;
-            }
-        }
-    }
-
-    return ['valide' => true, 'pavillon' => $pavillon, 'chambre' => $chambre,
-            'etage' => $etage, 'affiche' => $chambre . $pavillon];
-}
-
-/** Ajoute 'info' à chaque ligne du registre et retourne l'arbre trié pavillon › étage › [chambres]. */
-function construire_arbre(array &$registre): array
-{
-    $arbre = [];
-    foreach ($registre as &$ligne) {
-        $ligne['info'] = analyser_chambre($ligne['chambre']);
-        $i = $ligne['info'];
-        $arbre[$i['pavillon']][$i['etage']][] = $i['chambre'];
-    }
-    unset($ligne);
-
-    $trie = [];
-    foreach (array_merge(PAVILLONS, ['?']) as $pav) {
-        if (!isset($arbre[$pav])) {
-            continue;
-        }
-        $ordre = array_merge(array_keys(ETAGES[$pav] ?? []), [ETAGE_INCONNU, ETAGE_AUCUN]);
-        foreach ($ordre as $etage) {
-            if (!isset($arbre[$pav][$etage])) {
-                continue;
-            }
-            $chambres = array_values(array_unique(array_filter($arbre[$pav][$etage], fn($c) => $c !== null)));
-            sort($chambres, SORT_NUMERIC);
-            $trie[$pav][$etage] = $chambres;
-        }
-    }
-    return $trie;
-}
-
-// =============================================================================
-// 2. DONNÉES
-// =============================================================================
-// La version précédente rendait le HTML avec des gabarits lus dans dut1/equipe3.html et un script
-// equipe3.js, qui n'ont jamais été envoyés sur GitHub : la page restait vide. En attendant leur
-// version finale, l'Équipe 3 dispose ici d'un affichage simple au format commun (header.php / footer.php),
-// avec les filtres en GET (pavillon, « pas encore signé »).
+require_once __DIR__ . '/chambres.php';
 
 $req = $pdo->prepare(
     'SELECT p.prenom, p.nom, p.type_parrain, p.chambre, p.photo, (s.id_parrain IS NOT NULL) AS a_signe
@@ -120,70 +17,91 @@ $req = $pdo->prepare(
 );
 $req->execute([$moi['id']]);
 $registre = $req->fetchAll();
-$arbre = construire_arbre($registre);
+$arbre    = construire_arbre($registre);        // ajoute aussi $ligne['info']
 
-$pavillon = (string) ($_GET['pavillon'] ?? '');
-if (!isset($arbre[$pavillon])) {
+// Filtres : chaque valeur est vérifiée contre l'arbre (une valeur inconnue est ignorée)
+$pavillon   = (string) ($_GET['pavillon'] ?? '');
+$etage      = (string) ($_GET['etage'] ?? '');
+$chambre    = (string) ($_GET['chambre'] ?? '');
+$non_signes = !empty($_GET['non_signes']);
+if ($pavillon !== '' && !isset($arbre[$pavillon])) {
     $pavillon = '';
 }
-$non_signes = !empty($_GET['non_signes']);
+if ($etage !== '' && ($pavillon === '' || !isset($arbre[$pavillon][$etage]))) {
+    $etage = '';
+}
+if ($chambre !== '' && ($etage === '' || !ctype_digit($chambre) || !in_array((int) $chambre, $arbre[$pavillon][$etage], true))) {
+    $chambre = '';
+}
 
-$nb_signes = count(array_filter($registre, fn($r) => (bool) $r['a_signe']));
-$lignes = array_filter($registre, fn($r) => ($pavillon === '' || $r['info']['pavillon'] === $pavillon)
-    && (!$non_signes || !$r['a_signe']));
+$affiches = array_filter($registre, function (array $r) use ($pavillon, $etage, $chambre, $non_signes): bool {
+    $i = $r['info'];
+    return ($pavillon === '' || $i['pavillon'] === $pavillon)
+        && ($etage === '' || $i['etage'] === $etage)
+        && ($chambre === '' || (string) $i['chambre'] === $chambre)
+        && (!$non_signes || !$r['a_signe']);
+});
+$n = count($affiches);
 
-// =============================================================================
-// 3. PAGE
-// =============================================================================
-$titre_page = 'Registre des parrains et Mames';
+$titre_page = 'Registre';
 require __DIR__ . '/../includes/header.php';
 ?>
-<section class="carte">
-    <h1><?= e($titre_page) ?></h1>
-    <p class="petit"><?= e($nb_signes) ?> signature(s) sur <?= e(count($registre)) ?> signataires inscrits.</p>
+<section class="carte registre-carte">
+    <h1>Registre des parrains et Mames</h1>
+    <p>Retrouvez chaque parrain et Mame par pavillon, étage et chambre.</p>
 
-    <form class="registre-filtres" method="get">
+    <form class="formulaire registre-filtres" method="get">
         <div class="champ">
-            <label for="pavillon">Pavillon</label>
-            <select id="pavillon" name="pavillon">
+            <label for="registre-pavillon">Pavillon</label>
+            <select id="registre-pavillon" name="pavillon">
                 <option value="">Tous les pavillons</option>
                 <?php foreach (array_keys($arbre) as $pav): ?>
-                    <option value="<?= e($pav) ?>" <?= $pav === $pavillon ? 'selected' : '' ?>>
-                        <?= e($pav === '?' ? 'Chambre non reconnue' : 'Pavillon ' . $pav) ?>
-                    </option>
+                    <option value="<?= e($pav) ?>"<?= $pav === $pavillon ? ' selected' : '' ?>><?= $pav === '?' ? 'Chambre non reconnue' : 'Pavillon ' . e($pav) ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
-        <label class="registre-case"><input type="checkbox" name="non_signes" value="1" <?= $non_signes ? 'checked' : '' ?>> Pas encore signé seulement</label>
+        <div class="champ">
+            <label for="registre-etage">Étage</label>
+            <select id="registre-etage" name="etage"<?= $pavillon === '' ? ' disabled' : '' ?>>
+                <option value="">Tous les étages</option>
+                <?php foreach ($pavillon !== '' ? array_keys($arbre[$pavillon]) : [] as $et): ?>
+                    <option value="<?= e($et) ?>"<?= $et === $etage ? ' selected' : '' ?>><?= e($et === ETAGE_AUCUN ? 'Sans étage' : $et) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="champ">
+            <label for="registre-chambre">Chambre</label>
+            <select id="registre-chambre" name="chambre"<?= $etage === '' ? ' disabled' : '' ?>>
+                <option value="">Toutes les chambres</option>
+                <?php foreach ($etage !== '' ? $arbre[$pavillon][$etage] : [] as $ch): ?>
+                    <option value="<?= e($ch) ?>"<?= (string) $ch === $chambre ? ' selected' : '' ?>><?= e($ch) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <label class="registre-case">
+            <input type="checkbox" name="non_signes" value="1"<?= $non_signes ? ' checked' : '' ?>> Pas encore signé
+        </label>
         <button class="btn">Filtrer</button>
+        <a href="<?= e(url('dut1/registre.php')) ?>">Réinitialiser</a>
     </form>
-</section>
+    <p><small>Choisissez un pavillon puis cliquez sur « Filtrer » pour affiner par étage, puis par chambre.</small></p>
 
-<?php if (!$lignes): ?>
-    <p class="carte petit">Aucun signataire ne correspond.</p>
-<?php else: ?>
-    <div class="carte registre-defilant">
-        <table class="tableau">
-            <thead><tr><th></th><th>Nom</th><th>Type</th><th>Chambre</th><th>Étage</th><th>A signé</th></tr></thead>
-            <tbody>
-            <?php foreach ($lignes as $r): $i = $r['info']; ?>
-                <tr class="<?= $r['a_signe'] ? 'registre-fait' : '' ?>">
-                    <td>
-                        <?php if (!empty($r['photo'])): ?>
-                            <img class="avatar" src="<?= e(url($r['photo'])) ?>" alt="">
-                        <?php else: ?>
-                            <span class="avatar registre-initiales"><?= e(mb_strtoupper(mb_substr($r['prenom'], 0, 1) . mb_substr($r['nom'], 0, 1))) ?></span>
-                        <?php endif; ?>
-                    </td>
-                    <td><?= e($r['prenom'] . ' ' . $r['nom']) ?></td>
-                    <td><?= e($r['type_parrain']) ?></td>
-                    <td><?= e($i['affiche']) ?></td>
-                    <td><?= e($i['etage'] === ETAGE_AUCUN ? '' : $i['etage']) ?></td>
-                    <td><?= $r['a_signe'] ? '✔ Oui' : 'Pas encore' ?></td>
-                </tr>
+    <p class="registre-compteur"><?= e($n) ?> <?= $n > 1 ? 'personnes affichées' : 'personne affichée' ?></p>
+
+    <?php if ($n > 0): ?>
+        <ul class="signataire-liste">
+            <?php foreach ($affiches as $r): ?>
+                <li class="signataire-ligne">
+                    <input type="checkbox" disabled<?= $r['a_signe'] ? ' checked' : '' ?> aria-label="<?= $r['a_signe'] ? 'A signé' : 'Pas encore signé' ?>">
+                    <?= html_avatar($r) ?>
+                    <strong><?= e($r['prenom'] . ' ' . $r['nom']) ?></strong>
+                    <small><?= e(libelle_type_parrain($r['type_parrain']) . ' · ' . $r['info']['affiche']) ?></small>
+                    — <?= $r['a_signe'] ? 'A signé' : 'Pas encore signé' ?>
+                </li>
             <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-<?php endif; ?>
+        </ul>
+    <?php else: ?>
+        <p>Aucun parrain ni Mame ne correspond à ces filtres.</p>
+    <?php endif; ?>
+</section>
 <?php require __DIR__ . '/../includes/footer.php'; ?>
