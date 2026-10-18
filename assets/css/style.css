@@ -412,3 +412,10 @@ h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--espace); }
 @media (prefers-reduced-motion: reduce) {
     :where(.classement-page) *, :where(.classement-page) *::before, :where(.classement-page) *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---- Équipe 3 : registre (dut1/registre.php) ---- */
+.registre-filtres { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.registre-case { display: flex; gap: 8px; align-items: center; padding-bottom: 10px; }
+.registre-defilant { overflow-x: auto; }
+.registre-fait td { color: var(--couleur-succes); }
+.registre-initiales { display: inline-flex; align-items: center; justify-content: center; background: #dbeafe; color: var(--couleur-principale-fonce); font-weight: 700; font-size: 15px; }
