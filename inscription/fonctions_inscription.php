@@ -12,9 +12,6 @@
 /** Lettres (accents compris), espaces, apostrophes, points et tirets. */
 const REGEX_NOM_PERSONNE = "/^\p{L}[\p{L}\p{M} '.-]*$/u";
 
-/** Le DUT1 doit mettre sa photo (les parrains la reconnaissent) ; elle est facultative pour un parrain. */
-const PHOTO_OBLIGATOIRE = ['dut1' => true, 'parrain' => false];
-
 /**
  * Traite le formulaire d'inscription d'un rôle ('dut1' ou 'parrain').
  * Si tout est bon : crée le compte, puis redirige vers la page de connexion du rôle.

@@ -1,39 +1,32 @@
 /* =========================================================
    Équipes 1-2 : pages de connexion (connexion/dut1.php et connexion/parrain.php).
    Le formulaire est envoyé normalement au serveur (PHP vérifie tout) ; ce script ajoute
-   seulement le bouton « Afficher », la vérification des champs vides et l'indicateur d'envoi.
+   seulement la vérification des champs vides et l'indicateur d'envoi.
+   Le bouton « Afficher » du mot de passe est géré par main.js.
    ========================================================= */
-const $ = (id) => document.getElementById(id);
+const formulaireConnexion = document.getElementById('form-connexion');
+const champUtilisateur = document.getElementById('nom_utilisateur');
+const champMdp = document.getElementById('mot_de_passe');
+const zoneMessage = document.getElementById('connexion-message');
 
-const champUtilisateur = $('nom_utilisateur');
-const champMdp = $('mot_de_passe');
-const oeil = $('eye');
-
-/* Afficher / cacher le mot de passe */
-oeil.addEventListener('click', () => {
-  const montrer = champMdp.type === 'password';
-  champMdp.type = montrer ? 'text' : 'password';
-  oeil.textContent = montrer ? 'Masquer' : 'Afficher';
-  oeil.setAttribute('aria-pressed', String(montrer));
-  oeil.setAttribute('aria-label', (montrer ? 'Masquer' : 'Afficher') + ' le mot de passe');
-});
-
-function dire(texte) { $('msg').textContent = texte; }
 function marquer(champ, invalide) { champ.setAttribute('aria-invalid', invalide ? 'true' : 'false'); }
 
-[champUtilisateur, champMdp].forEach((champ) => champ.addEventListener('input', () => { marquer(champ, false); dire(''); }));
+[champUtilisateur, champMdp].forEach((champ) => champ.addEventListener('input', () => {
+  marquer(champ, false);
+  zoneMessage.textContent = '';
+}));
 
-$('form').addEventListener('submit', (ev) => {
+formulaireConnexion.addEventListener('submit', (ev) => {
   const nom = champUtilisateur.value.trim();
   const mdp = champMdp.value;
   marquer(champUtilisateur, !nom);
   marquer(champMdp, !mdp);
   if (!nom || !mdp) {
     ev.preventDefault();
-    dire(!nom ? 'Saisis ton nom d\'utilisateur.' : 'Saisis ton mot de passe.');
+    zoneMessage.textContent = !nom ? 'Saisis ton nom d’utilisateur.' : 'Saisis ton mot de passe.';
     (!nom ? champUtilisateur : champMdp).focus();
     return;
   }
-  $('go').disabled = true;
-  $('goText').textContent = 'Connexion en cours';
+  document.getElementById('connexion-bouton').disabled = true;
+  document.getElementById('connexion-bouton-texte').textContent = 'Connexion en cours';
 });
